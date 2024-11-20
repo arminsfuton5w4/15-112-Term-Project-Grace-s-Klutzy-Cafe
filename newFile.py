@@ -92,11 +92,15 @@ def drawCell(app, rows, col):
     drawRect(cellLeft, cellTop, cellWidth, cellHeight,
              fill=None, border='black', borderWidth=0.25)   
 
+def drawDisplay(app):
+    drawRect(0, app.height-100, app.width, 200, fill='blue', opacity=30)
 
 def redrawAll(app):
     drawTable(app)
     drawOrders(app)
     drawBoard(app)
+
+    drawDisplay(app)
 
 def main():
     runApp()
