@@ -14,21 +14,14 @@ class Waitress:
 
 
 class Customer:
-    def __init__(self, x, y, length, width):
+    def __init__(self, x, y):
             self.x, self.y = x,y
-            self.length, self.width =length, width
         
     def customerOrder(self):
         return generateOrder(menu, allToppings)
     
     def draw(self):
         drawRect(self.x, self.y, 50,20, fill='red')
-
-# class Customers:
-#     def __init__(self, customerList):
-#         self.customers=[]
-#         for (x,y,length, width) in customerList:
-#             self.customers.append(Customer(x,y,length, width))
 
 def distance(x0,y0,x1,y1):
     return (((x1-x0)**2+(y1-y0)**2)**0.5)
@@ -65,27 +58,54 @@ def getIngredients(order):
 #MODEL
 def onAppStart(app):
     app.width, app.height = 800,500
+    app.rows, app.cols=10,16
     app.customers=[]
     app.isCooking=False
+    app.StepsPerSecond=2
 
 #VIEW
-def drawTable(app):          
+def drawTable(app):
+    tableW, tableH, color=75,60,'red'         
     for i in range(3):
-        drawRect(200+i*100,200,50,50, fill='black')
+        if i%2==1:
+            drawOval(450, 250, tableW, tableH, fill=color)
+        else:
+            drawOval(350+i*100,350,tableW, tableH, fill=color)
     
 def drawOrders(app):
     drawRect(375, 50, 150, 160, fill='blue', opacity=30)
+
+def drawBoard(app):
+    for row in range(app.rows):
+        for col in range(app.cols):
+            drawCell(app, row, col)
+
+def getCellLeftTop(app, row, col):
+    cellWidth, cellHeight = 50,50
+    cellLeft = 0 + col * cellWidth
+    cellTop = 0 + row * cellHeight
+    return (cellLeft, cellTop)
+
+def drawCell(app, rows, col):
+    cellLeft, cellTop=getCellLeftTop(app, rows, col)
+    cellWidth,cellHeight=50,50
+    drawRect(cellLeft, cellTop, cellWidth, cellHeight,
+             fill=None, border='black', borderWidth=0.25)   
 
 
 def redrawAll(app):
     drawTable(app)
     drawOrders(app)
-    for 
+    drawBoard(app)
 
 def main():
     runApp()
 
 main()
 #CONTROLLER
+
+def onStep(app):
+    pass
+
 
 cmu_graphics.run()
