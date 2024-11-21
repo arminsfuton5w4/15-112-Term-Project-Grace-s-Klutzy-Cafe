@@ -5,8 +5,8 @@ class Customer:
     def moveCustomer(self,x,y, app):
          startRow, startCol=3,13
          targetRow, targetCol=solve(self, app, startRow, startCol)
-         self.x=#coordinate of targetRow
-         self.y=#coordinate of targetCol
+         self.x, self.y=findCoordinate(targetRow, targetCol)#coordinate of targetRow
+         
     
     def isLegal(targetRow, targetCol, board):  
          rows, col=len(board), len(board[0])
