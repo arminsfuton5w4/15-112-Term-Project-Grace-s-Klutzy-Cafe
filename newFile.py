@@ -6,7 +6,7 @@ class Waitress:
     def __init__(self, x, y):
         self.x, self.y = x,y
 
-    def move(self):
+    def move(self, app):
         self.y-=3
     
     def draw(self, app):
@@ -18,9 +18,6 @@ class Customer:
         
     def customerOrder(self):
         return generateOrder(menu, allToppings)
-    
-    def drawCustomer(self, app):
-        drawRect(self.x, self.y, 50,100, fill='red')
     
     def moveCustomer(self, app):
         self.x+=5
@@ -121,15 +118,19 @@ def redrawAll(app):
     drawDisplay(app)
     w=Waitress(200,200)
     w.draw(app)
+    
     for customer in app.customers:
-        customer.drawCustomer(app)
+        drawRect(customer.x, customer.y, 50,100, fill='red')
 
 #CONTROLLER
 
 def onStep(app):
     app.counter+=1
-    if app.counter%50==0:
-        app.customers.append(Customer(200,700))
+    newCustomer=Customer(700,200)
+    if app.counter%50==0 and len(app.customers)<=3:
+        app.customers.append(newCustomer)
+    for customer in app.customers:
+        customer.moveCustomer(app)
 
 def onMousePress(app, mouseX, mouseY):
     # if (mouseX, mouseY) in #any of the ingredient coordinates
