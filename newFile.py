@@ -21,6 +21,10 @@ class Customer:
     
     def drawCustomer(self, app):
         drawRect(self.x, self.y, 50,100, fill='red')
+    
+    def moveCustomer(self, app):
+        self.x+=5
+        self.y+=5
 
 class Ingredient:
     def __init__(self, link):
@@ -72,7 +76,7 @@ def onAppStart(app):
     app.isCooking=False
     app.StepsPerSecond=2
     app.counter=0
-    app.transluscence=0 #0: opacity=0, 1: opacity=50, 2: opacity=100
+    app.translucence=0 #0: opacity=0, 1: opacity=50, 2: opacity=100
 
     app.foodX, app.foodY=100,50
 
@@ -124,7 +128,7 @@ def redrawAll(app):
 
 def onStep(app):
     app.counter+=1
-    if app.counter%100==0:
+    if app.counter%50==0:
         app.customers.append(Customer(200,700))
 
 def onMousePress(app, mouseX, mouseY):
@@ -136,7 +140,7 @@ def onMousePress(app, mouseX, mouseY):
         app.foodX=mouseX
         app.foodY=mouseY
         app.isDragging=True
-        app.transluscence=1
+        app.translucence=1
 
 def onMouseDrag(app, mouseX, mouseY):
     if app.isCooking:
@@ -146,9 +150,10 @@ def onMouseDrag(app, mouseX, mouseY):
 def onMouseRelease(app, mouseX, mouseY):
     if app.isCooking:
         app.isDragging=False
-        app.transluscence=2 
+        app.translucence=2 
+
 def main():
     runApp()
-    
+
 main()
 cmu_graphics.run()
