@@ -5,11 +5,11 @@ import copy
 class Waitress:
     def __init__(self, x, y):
         self.x, self.y = x,y
-    
+
     def move(self):
         self.y-=3
     
-    def draw(self):
+    def draw(self, app):
         drawRect(self.x, self.y,50,100, fill='purple')
 
 class Customer:
@@ -19,23 +19,21 @@ class Customer:
     def customerOrder(self):
         return generateOrder(menu, allToppings)
     
-    def draw(self):
+    def drawCustomer(self, app):
         drawRect(self.x, self.y, 50,100, fill='red')
 
-class Ingredients:
-    def __init__(self):
-        self.cakeRoll='cmu://903290/33748782/0c726d7f441baf1ab17eb76c5f755f13.png'
-        milkTea=1
-        sunday=2
-        crepeCake=3
-        
+class Ingredient:
+    def __init__(self, link):
+        self.image=link
     
-    def draw(self):
+    def draw(self, app):
         for i in range(len(self.ingredients)):
-            drawCircle(50+i*70, 150-i*35,50, fill='green')
+            drawImage(self.image, 50+i*70, 150-i*35,50, fill='green')
 
 def distance(x0,y0,x1,y1):
     return (((x1-x0)**2+(y1-y0)**2)**0.5)
+
+cakeRoll=Ingredient('cmu://903290/33748782/0c726d7f441baf1ab17eb76c5f755f13.png')
 
 menu =['cake-roll', 'milk-tea', 'sunday', 'crepe-cake']
 flavors={'fruits': {'strawberry', 'peach', 'mango'},'others': {'matcha', 'chocolate', 'ube', 'red-bean'}}
@@ -73,6 +71,7 @@ def onAppStart(app):
     app.customers=[]
     app.isCooking=False
     app.StepsPerSecond=2
+    app.counter=0
     app.transluscence=0 #0: opacity=0, 1: opacity=50, 2: opacity=100
 
     app.foodX, app.foodY=100,50
@@ -87,7 +86,6 @@ def drawTable(app):
             drawOval(350+i*100,350,tableW, tableH, fill=color)
     
 def drawOrderList(app):
-    
     drawRect(375, 25, 150, 160, fill='blue', opacity=30)
 
 def drawBoard(app):
@@ -105,7 +103,7 @@ def drawCell(app, rows, col):
     cellLeft, cellTop=getCellLeftTop(app, rows, col)
     cellWidth,cellHeight=50,50
     drawRect(cellLeft, cellTop, cellWidth, cellHeight,
-             fill=None, border='black', borderWidth=0.25)   
+             fill=None, border='black', borderWidth=0.15)   
 
 def drawDisplay(app):
     displayHeight=200
@@ -117,24 +115,28 @@ def redrawAll(app):
     drawBoard(app)
 
     drawDisplay(app)
-    Waitress.draw(waitress)
-    Customer.draw(self)
-    Ingredients()
-
-def main():
-    runApp()
+    w=Waitress(200,200)
+    w.draw(app)
+    for customer in app.customers:
+        customer.drawCustomer(app)
 
 #CONTROLLER
+
 def onStep(app):
-    pass
+    app.counter+=1
+    if app.counter%100==0:
+        app.customers.append(Customer(200,700))
 
 def onMousePress(app, mouseX, mouseY):
+    # if (mouseX, mouseY) in #any of the ingredient coordinates
+
+    # if (mouseX, mouseY) in #table coordinates
+
     if app.isCooking:
         app.foodX=mouseX
         app.foodY=mouseY
         app.isDragging=True
         app.transluscence=1
-
 
 def onMouseDrag(app, mouseX, mouseY):
     if app.isCooking:
@@ -144,8 +146,9 @@ def onMouseDrag(app, mouseX, mouseY):
 def onMouseRelease(app, mouseX, mouseY):
     if app.isCooking:
         app.isDragging=False
-        app.transluscence=2
+        app.transluscence=2 
+def main():
+    runApp()
     
-
 main()
 cmu_graphics.run()
