@@ -8,6 +8,11 @@ class Customer:
          self.x=#coordinate of targetRow
          self.y=#coordinate of targetCol
     
+    def isLegal(targetRow, targetCol, board):  
+         rows, col=len(board), len(board[0])
+         return (0<=targetRow<rows and 0<=targetCol<cols
+             and board[targetRow][targetCol]==0)
+    
     def solve(self, board, row, col):
         if board[targetRow][targetCol]==2:
              return targetRow, targetCol
@@ -22,10 +27,7 @@ class Customer:
                         board[targetRow][targetCol]==0
             return None
     
-    def isLegal(targetRow, targetCol, board):  
-         rows, col=len(board), len(board[0])
-         return (0<=targetRow<rows and 0<=targetCol<cols
-             and board[targetRow][targetCol]==0)
+    
     
                     
                     
