@@ -67,7 +67,7 @@ def getIngredients(order):
 def onAppStart(app):
     app.width, app.height = 800,500
     app.rows, app.cols=10,16
-    app.board=[([None] * app.cols) for row in range(app.rows)]
+    app.board=makeBoard(app)
 
     app.customers=[]
     app.isCooking=False
@@ -76,6 +76,20 @@ def onAppStart(app):
     app.translucence=0 #0: opacity=0, 1: opacity=50, 2: opacity=100
 
     app.foodX, app.foodY=100,50
+
+def makeBoard(app):
+    board=[([0] * 16) for row in range(10)]
+    newB=[[10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
+           [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
+           [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
+           [10, 10, 10, 10, 10, 10, 10, 10, 10, 0, 0, 0, 0, 0, 10, 10],
+           [10, 10, 10, 10, 10, 10, 10, 0, 0, 0, 0, 0, 0, 0, 10, 10],
+           [10, 10, 10, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [10, 10, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [10, 10, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
+           [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]]
+    return newB
 
 #VIEW
 def drawTable(app):
@@ -127,7 +141,7 @@ def redrawAll(app):
 def onStep(app):
     app.counter+=1
     newCustomer=Customer(700,200)
-    if app.counter%50==0 and len(app.customers)<=3:
+    if app.counter%50==0 and len(app.customers)<3:
         app.customers.append(newCustomer)
     for customer in app.customers:
         customer.moveCustomer(app)
