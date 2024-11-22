@@ -29,8 +29,8 @@ class Customer:
         path=state[-1]
         pathCoord=[]
         for i in range(len(path)):
-            x=app.cellWidth*i
-            y=app.cellHeight*i
+            x=200+app.cellWidth*i
+            y=200+app.cellHeight*i
             pathCoord.append((x,y))
         return pathCoord
 
@@ -42,7 +42,6 @@ class Ingredient:
 class Ingredients:
     def __init__(self):
         self.ingredients=[]
-    
     def draw(self, app):
         for i in range(len(self.ingredients)):
             drawImage(self.image, 50+i*70, 150-i*35,50, fill='green')
@@ -98,20 +97,20 @@ def DFS(adjacencyList, state, s, v):
     if v in s:
         return revisit(state, v)
     else:
-        visit(state, v)
+        state=visit(state, v)
         s.add(v)
-        for neighbor in adjacencyList[v]:
-            DFS(adjacencyList, state, s, neighbor)
-        finish(state, v)
+        for neighbor in adjacencyList.get(v,[]):
+            state=DFS(adjacencyList, state, s, neighbor)
+        state=finish(state, v)
+    return state
 
-def visit(state, v):
+def visit(state, v): 
     b,target,L=state
     if not b:
         L.append(v)
     if v in target:
         b=True
-    else:
-        return (b, target, L)
+    return (b, target, L)
     
 def revisit(state, v):
     return state
@@ -157,7 +156,7 @@ def onAppStart(app):
     app.customers=[]
     app.isCooking=False
     app.revenue=0.00
-    app.StepsPerSecond=2
+    app.StepsPerSecond=1
     app.counter=0
     app.translucence=0 #0: opacity=0, 1: opacity=50, 2: opacity=100
 
@@ -215,14 +214,18 @@ def redrawAll(app):
 
 def onStep(app):
     app.counter+=1
+    i=0
     newCustomer=Customer(700,200)
-    if app.counter%50==0 and len(app.customers)<3:
+    if app.counter%100==0 and len(app.customers)<3:
         app.customers.append(newCustomer)
-    for customer in app.customers:
-        path=customer.customerPath(app)
-        for (x,y) in path:
-            customer.x=x
-            customer.y=y
+    if app.counter%20==0:
+        for customer in app.customers:
+            pathCoord=customer.customerPath(app)
+            while i <len(pathCoord):
+                customer.x, customer.y=pathCoord[i][0], pathCoord[i][1]
+                i+=1
+            if i==len(pathCoord):
+                i=0
 
 def onMousePress(app, mouseX, mouseY):
     # if (mouseX, mouseY) in #any of the ingredient coordinates
