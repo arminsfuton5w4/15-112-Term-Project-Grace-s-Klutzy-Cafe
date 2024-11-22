@@ -2,6 +2,10 @@ from cmu_graphics import *
 import random
 import copy
 
+################################################################################
+        # CLASSES
+################################################################################
+
 class Waitress:
     def __init__(self, x, y):
         self.x, self.y = x,y
@@ -12,9 +16,10 @@ class Waitress:
 class Customer:
     def __init__(self, x, y):
             self.x, self.y = x,y
-
-    def customerOrder(self):
-        return generateOrder(menu, allToppings)
+            self.order=generateOrder(menu, allToppings)
+    
+    def __repr__(self):
+        return f'{self.order}'
     
     def customerPath(self,app):
         tables=[(0,4),(0,5),(1,4),(1,5), (2,1),(2,2),(3,1),(3,2), (2,7),(2,8),(3,7),(3,8)]
@@ -24,8 +29,8 @@ class Customer:
         path=state[-1]
         pathCoord=[]
         for i in range(len(path)):
-            x=app.cellWidth*i+200
-            y=app.cellHeight*i+200
+            x=app.cellWidth*i
+            y=app.cellHeight*i
             pathCoord.append((x,y))
         return pathCoord
 
@@ -33,81 +38,28 @@ class Customer:
 class Ingredient:
     def __init__(self, link):
         self.image=link
+
+class Ingredients:
+    def __init__(self):
+        self.ingredients=[]
     
     def draw(self, app):
-        drawImage(self.image, 50+i*70, 150-i*35,50, fill='green')
+        for i in range(len(self.ingredients)):
+            drawImage(self.image, 50+i*70, 150-i*35,50, fill='green')
 
 def distance(x0,y0,x1,y1):
     return (((x1-x0)**2+(y1-y0)**2)**0.5)
 
 cakeRoll=Ingredient('cmu://903290/33748782/0c726d7f441baf1ab17eb76c5f755f13.png')
-cakeRoll.draw(app)
+milkTea=Ingredient('cmu://903290/35227983/tokihyo_.jpeg')
 
-menu =['cake-roll', 'milk-tea', 'sunday', 'crepe-cake']
-flavors={'fruits': {'strawberry', 'peach', 'mango'},'others': {'matcha', 'chocolate', 'ube', 'red-bean'}}
+menu=['cake-roll', 'milk-tea','sunday','crepe-cake']
+menuPrice ={'cake-roll':7.50, 'milk-tea':5.50, 'sunday':6.75, 'crepe-cake':8.00}
 allToppings=['strawberry', 'mango', 'matcha', 'chocolate', 'ube', 'red-bean']
 
-
-def DFS(adjacencyList, state, s, v):
-    b,target,L=state
-    if v in s:
-        return revisit(state, v)
-    else:
-        visit(state, v)
-        s.add(v)
-        for neighbor in adjacencyList[v]:
-            DFS(adjacencyList, state, s, neighbor)
-        finish(state, v)
-
-def visit(state, v):
-    b,target,L=state
-    if not b:
-        L.append(v)
-    if v in target:
-        b=True
-    else:
-        return (b, target, L)
-    
-def revisit(state, v):
-    return state
-
-def finish(state, v):
-    return state
-
-def generateOrder(menu, allToppings):
-    toppings=copy.copy(allToppings)
-    topping1=allToppings[random.randint(0,len(allToppings))]
-    toppings.remove(topping1)
-    topping2=toppings[random.randint(0,len(allToppings))]
-    return f'{topping1} {topping2} {menu[random.randint(0,len(menu))]}'
-
-def makeDish(order):
-    t1, t2, base=getIngredients(order)
-
-def getIngredients(order):
-    items=order.split()
-    topping1=items[0]
-    topping2=items[1]
-    base=items[2]
-    return (topping1, topping2, base) 
-
-#table locations & boundaries
-#kitchen area boundaries (waitress + customers cannot go in)
-#within kitchen area, drag and drop ingredients onto platter occurs      
-
-#MODEL
-def onAppStart(app):
-    app.width, app.height = 800,500
-    app.rows, app.cols=4,12
-    app.cellWidth, app.cellHeight = 50,50
-
-    app.customers=[]
-    app.isCooking=False
-    app.StepsPerSecond=2
-    app.counter=0
-    app.translucence=0 #0: opacity=0, 1: opacity=50, 2: opacity=100
-
-    app.foodX, app.foodY=100,50
+################################################################################
+        # DFS
+################################################################################
 
 def makeAdjacencyList():
     adjList=dict()
@@ -140,7 +92,76 @@ board=makeAdjacencyList()
 tables=[(0,4),(0,5),(1,4),(1,5), (2,1),(2,2),(3,1),(3,2), (2,7),(2,8),(3,7),(3,8)]
 visited=set()
 state=(False, tables, [])
-print(DFS(board, state, visited, (0,9)))
+
+def DFS(adjacencyList, state, s, v):
+    b,target,L=state
+    if v in s:
+        return revisit(state, v)
+    else:
+        visit(state, v)
+        s.add(v)
+        for neighbor in adjacencyList[v]:
+            DFS(adjacencyList, state, s, neighbor)
+        finish(state, v)
+
+def visit(state, v):
+    b,target,L=state
+    if not b:
+        L.append(v)
+    if v in target:
+        b=True
+    else:
+        return (b, target, L)
+    
+def revisit(state, v):
+    return state
+
+def finish(state, v):
+    return state
+
+################################################################################
+        # DFS
+################################################################################
+
+def generateOrder(menu, allToppings):
+    toppings=copy.copy(allToppings)
+    topping1=allToppings[random.randint(0,len(allToppings)-1)]
+    toppings.remove(topping1)
+    topping2=toppings[random.randint(0,len(toppings)-1)]
+    return f'{topping1} {topping2} {menu[random.randint(0,len(menu)-1)]}'
+
+def makeDish(order):
+    t1, t2, base=getIngredients(order)
+
+def getIngredients(order):
+    items=order.split()
+    topping1=items[0]
+    topping2=items[1]
+    base=items[2]
+    return (topping1, topping2, base) 
+
+def getRevenue(menu,tip):
+    pass
+
+#table locations & boundaries
+#kitchen area boundaries (waitress + customers cannot go in)
+#within kitchen area, drag and drop ingredients onto platter occurs      
+
+################################################################################
+#MODEL
+def onAppStart(app):
+    app.width, app.height = 800,500
+    app.rows, app.cols=4,12
+    app.cellWidth, app.cellHeight = 50,50
+
+    app.customers=[]
+    app.isCooking=False
+    app.revenue=0.00
+    app.StepsPerSecond=2
+    app.counter=0
+    app.translucence=0 #0: opacity=0, 1: opacity=50, 2: opacity=100
+
+    app.foodX, app.foodY=100,50
 
 #VIEW
 def drawTable(app):
@@ -153,6 +174,10 @@ def drawTable(app):
     
 def drawOrderList(app):
     drawRect(375, 25, 150, 160, fill='blue', opacity=30)
+    drawLabel('orders', 450, 45, bold=True)
+    for i in range(len(app.customers)):
+        customer=app.customers[i]
+        drawLabel({customer.order}, 450, 65+i*15, size=10)
 
 def drawBoard(app):
     for row in range(app.rows):
@@ -187,7 +212,6 @@ def redrawAll(app):
         drawRect(customer.x, customer.y, 50,100, fill='red')
 
 #CONTROLLER
-
 
 def onStep(app):
     app.counter+=1
