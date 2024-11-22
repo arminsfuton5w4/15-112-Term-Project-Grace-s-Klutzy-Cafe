@@ -5,9 +5,6 @@ import copy
 class Waitress:
     def __init__(self, x, y):
         self.x, self.y = x,y
-
-    def move(self, app):
-        self.y-=3
     
     def draw(self, app):
         drawRect(self.x, self.y,50,100, fill='purple')
@@ -15,26 +12,36 @@ class Waitress:
 class Customer:
     def __init__(self, x, y):
             self.x, self.y = x,y
-        
+
     def customerOrder(self):
         return generateOrder(menu, allToppings)
     
-    def moveCustomer(self, app):
-        self.x+=5
-        self.y+=5
+    def customerPath(self,app):
+        tables=[(0,4),(0,5),(1,4),(1,5), (2,1),(2,2),(3,1),(3,2), (2,7),(2,8),(3,7),(3,8)]
+        visited=set()
+        state=(False, tables, [])
+        path=DFS(board, state, visited, (0,9))
+        path=state[-1]
+        pathCoord=[]
+        for i in range(len(path)):
+            x=app.cellWidth*i+200
+            y=app.cellHeight*i+200
+            pathCoord.append((x,y))
+        return pathCoord
+
 
 class Ingredient:
     def __init__(self, link):
         self.image=link
     
     def draw(self, app):
-        for i in range(len(self.ingredients)):
-            drawImage(self.image, 50+i*70, 150-i*35,50, fill='green')
+        drawImage(self.image, 50+i*70, 150-i*35,50, fill='green')
 
 def distance(x0,y0,x1,y1):
     return (((x1-x0)**2+(y1-y0)**2)**0.5)
 
 cakeRoll=Ingredient('cmu://903290/33748782/0c726d7f441baf1ab17eb76c5f755f13.png')
+cakeRoll.draw(app)
 
 menu =['cake-roll', 'milk-tea', 'sunday', 'crepe-cake']
 flavors={'fruits': {'strawberry', 'peach', 'mango'},'others': {'matcha', 'chocolate', 'ube', 'red-bean'}}
@@ -48,8 +55,8 @@ def DFS(adjacencyList, state, s, v):
     else:
         visit(state, v)
         s.add(v)
-        for neighbor in board[v]:
-            DFS(adjacencyList, L, s, neighbor)
+        for neighbor in adjacencyList[v]:
+            DFS(adjacencyList, state, s, neighbor)
         finish(state, v)
 
 def visit(state, v):
@@ -91,8 +98,8 @@ def getIngredients(order):
 #MODEL
 def onAppStart(app):
     app.width, app.height = 800,500
-    app.rows, app.cols=10,16
-    app.board=adjacencyList()
+    app.rows, app.cols=4,12
+    app.cellWidth, app.cellHeight = 50,50
 
     app.customers=[]
     app.isCooking=False
@@ -153,9 +160,8 @@ def drawBoard(app):
             drawCell(app, row, col)
 
 def getCellLeftTop(app, row, col):
-    cellWidth, cellHeight = 50,50
-    cellLeft = 0 + col * cellWidth
-    cellTop = 0 + row * cellHeight
+    cellLeft = 200 + col * app.cellWidth
+    cellTop = 200 + row * app.cellHeight
     return (cellLeft, cellTop)
 
 def drawCell(app, rows, col):
@@ -182,13 +188,17 @@ def redrawAll(app):
 
 #CONTROLLER
 
+
 def onStep(app):
     app.counter+=1
     newCustomer=Customer(700,200)
     if app.counter%50==0 and len(app.customers)<3:
         app.customers.append(newCustomer)
     for customer in app.customers:
-        customer.moveCustomer(app)
+        path=customer.customerPath(app)
+        for (x,y) in path:
+            customer.x=x
+            customer.y=y
 
 def onMousePress(app, mouseX, mouseY):
     # if (mouseX, mouseY) in #any of the ingredient coordinates

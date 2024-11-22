@@ -27,6 +27,7 @@ class Customer:
                         board[targetRow][targetCol]==0
             return None
     
+
     
     
                     
