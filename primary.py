@@ -23,7 +23,7 @@ class Layout:
             other.isAtTable=True
 
 layout2=Layout([(0,4),(0,5),(1,4),(1,5), (2,1),(2,2),(3,1),(3,2), (2,7),(2,8),(3,7),(3,8)])
-layout=Layout([(1,4),(3,1),(3,8)])
+layout=Layout([(1,4),(3,2),(3,8)])
 
 class Customer:
     def __init__(self, x, y):
@@ -56,36 +56,57 @@ def coordToGraph(coordX, coordY):
     y=(coordY-200)//50
     return x,y
 
-class Ingredient:
-    def __init__(self, link):
-        self.image=link
-
 class Ingredients:
     def __init__(self):
-        self.ingredients=[]
+        self.ingredientList=dict()
     
-    def add(self, other):
-        self.ingredients.append(other)
+    def addIngredients(self, other):
+        self.ingredientList[other]=(other.x, other.y)
 
     def draw(self, app):
         for i in range(len(self.ingredients)):
             drawImage(self.image, 50+i*70, 150-i*35,50, fill='green')
 
+class Counter:
+    def __init__(self):
+        self.base=None
+        self.topping1=None
+        self.topping2=None
+        self.coordinates=()
+# after drag into counter --> they become the items
+# check 3 fields are field, display image
+
+class Base:
+    def __init__(self, name, link, x,y, price):
+        self.name=name
+        self.image=link
+        self.x, self.y=x,y
+        self.price=price
+    
+    def __repr__(self):
+        return f'{self.name}'
+
+class Toppings:
+    def __init__(self, name, link, x,y):
+        self.name=name
+        self.image=link
+        self.x, self.y=x,y
+    
+    def __repr__(self):
+        return f'{self.name}'   
+
 def distance(x0,y0,x1,y1):
     return (((x1-x0)**2+(y1-y0)**2)**0.5)
 
-cakeRoll=Ingredient('cmu://903290/33748782/0c726d7f441baf1ab17eb76c5f755f13.png')
-milkTea=Ingredient('cmu://903290/35227983/tokihyo_.jpeg')
-# sunday=Ingredient()
-# crepeCake=Ingredient()
-# strawberry=Ingredient()
-# mango=Ingredient()
-# chocolate=Ingredient()
-# ube=Ingredient()
-# redBean=Ingredient()
-
-# ingredientList=Ingredients()
-# ingredientList.add(cakeRoll)
+cakeRoll=Base('cake-roll', 'cmu://903290/33748782/0c726d7f441baf1ab17eb76c5f755f13.png',50,100, 7.50)
+crepeCake=Base('crepe-cake', 'cmu://903290/35264027/_+(5).jpeg',80, 80, 8.00)
+sunday=Base('sunday', 'cmu://903290/35264045/_+(4).jpeg', 50, 180, 6.75)
+milkTea=Base('milk-tea', 'cmu://903290/35227983/tokihyo_.jpeg', 80, 140, 5.50)
+# strawberry=Toppings('strawberry', '',)
+# mango=Toppings('mango', '', )
+# chocolate=Toppigns('chocolate', '', )
+# ube=Toppings('ube', '',)
+# redBean=Toppings('red-bean', '', )
 
 
 menu=['cake-roll', 'milk-tea','sunday','crepe-cake']
@@ -175,9 +196,7 @@ def getIngredients(order):
 def getRevenue(menu,tip):
     pass
 
-#table locations & boundaries
-#kitchen area boundaries (waitress + customers cannot go in)
-#within kitchen area, drag and drop ingredients onto platter occurs      
+#table locations & boundaries    
 
 ################################################################################
 #MODEL
@@ -194,7 +213,7 @@ def onAppStart(app):
     app.counter=0
     app.translucence=0 #0: opacity=0, 1: opacity=50, 2: opacity=100
 
-    app.foodX, app.foodY=100,50
+    app.ingredientSize=45
 
 #VIEW
 def drawTable(app):
@@ -268,28 +287,32 @@ def moveCustomer(i, app):
 
 def onStep(app):
     app.counter+=1
-    if app.counter%100==0 and len(app.customers)<=3:
+    if app.counter%100==0 and len(app.customers)<3:
         print(app.customers)
         generateCustomer(app)
     if app.counter%10==0 and len(app.customers)>0:
         moveCustomer(app.currIndex, app)
         app.currIndex+=1
     
+def clickedIngredient(mouseX, mouseY):
+    pass
+
+def getIngredient(mouseX, mouseY):
+    pass
+
 def onMousePress(app, mouseX, mouseY):
-    # if (mouseX, mouseY) in #any of the ingredient coordinates
+    if clickedIngredient(mouseX, mouseY):
+        getIngredient(mouseX, mouseY)
+        app.translucence=1
+        app.isDragging=True
 
     # if (mouseX, mouseY) in #table coordinates
 
-    if app.isCooking:
-        app.foodX=mouseX
-        app.foodY=mouseY
-        app.isDragging=True
-        app.translucence=1
 
 def onMouseDrag(app, mouseX, mouseY):
-    if app.isCooking:
-        app.foodX=mouseX
-        app.foodY=mouseY
+    if clickedIngredient(mouseX, mouseY):
+        getIngredient(mouseX, mouseY)
+
 
 def onMouseRelease(app, mouseX, mouseY):
     if app.isCooking:
