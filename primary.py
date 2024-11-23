@@ -13,27 +13,47 @@ class Waitress:
     def draw(self, app):
         drawRect(self.x, self.y,50,100, fill='purple')
 
+class Layout:
+    def __init__(self,tables):
+        self.tables=tables
+    
+    def isAtTable(self, other, app):
+        x,y=coordToGraph(other.x, other.y)
+        if (y, x) in self.tables:
+            other.isAtTable=True
+
+layout=Layout([(0,4),(0,5),(1,4),(1,5), (2,1),(2,2),(3,1),(3,2), (2,7),(2,8),(3,7),(3,8)])
+
 class Customer:
     def __init__(self, x, y):
             self.x, self.y = x,y
             self.order=generateOrder(menu, allToppings)
+            self.isAtTable=False
     
     def __repr__(self):
         return f'{self.order}'
     
     def customerPath(self,app):
-        tables=[(0,4),(0,5),(1,4),(1,5), (2,1),(2,2),(3,1),(3,2), (2,7),(2,8),(3,7),(3,8)]
+        tables=layout.tables
         visited=set()
         state=(False, tables, [])
         path=DFS(board, state, visited, (0,9))
         path=state[-1]
-        pathCoord=[]
-        for i in range(len(path)):
-            x=200+app.cellWidth*i
-            y=200+app.cellHeight*i
-            pathCoord.append((x,y))
+        pathCoord=graphToCoord(app, path)
         return pathCoord
 
+def graphToCoord(app, path):
+    pathCoord=[]
+    for i in range(len(path)):
+        x=200+app.cellWidth*path[i][1]
+        y=200+app.cellHeight*path[i][0]
+        pathCoord.append((x,y))
+    return pathCoord
+
+def coordToGraph(coordX, coordY):
+    x=(coordX-200)//50
+    y=(coordY-200)//50
+    return x,y
 
 class Ingredient:
     def __init__(self, link):
@@ -42,6 +62,10 @@ class Ingredient:
 class Ingredients:
     def __init__(self):
         self.ingredients=[]
+    
+    def add(self, other):
+        self.ingredients.append(other)
+
     def draw(self, app):
         for i in range(len(self.ingredients)):
             drawImage(self.image, 50+i*70, 150-i*35,50, fill='green')
@@ -51,6 +75,17 @@ def distance(x0,y0,x1,y1):
 
 cakeRoll=Ingredient('cmu://903290/33748782/0c726d7f441baf1ab17eb76c5f755f13.png')
 milkTea=Ingredient('cmu://903290/35227983/tokihyo_.jpeg')
+# sunday=Ingredient()
+# crepeCake=Ingredient()
+# strawberry=Ingredient()
+# mango=Ingredient()
+# chocolate=Ingredient()
+# ube=Ingredient()
+# redBean=Ingredient()
+
+# ingredientList=Ingredients()
+# ingredientList.add(cakeRoll)
+
 
 menu=['cake-roll', 'milk-tea','sunday','crepe-cake']
 menuPrice ={'cake-roll':7.50, 'milk-tea':5.50, 'sunday':6.75, 'crepe-cake':8.00}
@@ -88,9 +123,6 @@ def makeAdjacencyList():
     return adjList
 
 board=makeAdjacencyList()
-tables=[(0,4),(0,5),(1,4),(1,5), (2,1),(2,2),(3,1),(3,2), (2,7),(2,8),(3,7),(3,8)]
-visited=set()
-state=(False, tables, [])
 
 def DFS(adjacencyList, state, s, v):
     b,target,L=state
@@ -119,7 +151,7 @@ def finish(state, v):
     return state
 
 ################################################################################
-        # DFS
+        # OTHER
 ################################################################################
 
 def generateOrder(menu, allToppings):
@@ -157,6 +189,7 @@ def onAppStart(app):
     app.isCooking=False
     app.revenue=0.00
     app.StepsPerSecond=1
+    app.currIndex=0
     app.counter=0
     app.translucence=0 #0: opacity=0, 1: opacity=50, 2: opacity=100
 
@@ -208,25 +241,39 @@ def redrawAll(app):
     w.draw(app)
     
     for customer in app.customers:
-        drawRect(customer.x, customer.y, 50,100, fill='red')
+        drawRect(customer.x, customer.y, 50,100, fill='red', align='center')
 
 #CONTROLLER
 
+def generateCustomer(app):
+    newCustomer=Customer(700,200)
+    app.customers.append(newCustomer)
+
+def removeSeat(coordX,coordY, tables):
+    x,y=coordToGraph(coordX, coordY)
+    if (y,x) in tables:
+        tables.remove((y,x))
+
+def moveCustomer(i, app):
+    for customer in app.customers:
+        layout.isAtTable(customer, app)
+        if not customer.isAtTable:
+            pathCoord=customer.customerPath(app)
+            print('not at table:', customer)
+            i%=len(pathCoord)
+            customer.x, customer.y=pathCoord[i][0], pathCoord[i][1]
+        else:
+            removeSeat(customer.x, customer.y, layout.tables)
+
 def onStep(app):
     app.counter+=1
-    i=0
-    newCustomer=Customer(700,200)
-    if app.counter%100==0 and len(app.customers)<3:
-        app.customers.append(newCustomer)
-    if app.counter%20==0:
-        for customer in app.customers:
-            pathCoord=customer.customerPath(app)
-            while i <len(pathCoord):
-                customer.x, customer.y=pathCoord[i][0], pathCoord[i][1]
-                i+=1
-            if i==len(pathCoord):
-                i=0
-
+    if app.counter%100==0 and len(app.customers)<=3:
+        print(app.customers)
+        generateCustomer(app)
+    if app.counter%10==0 and len(app.customers)>0:
+        moveCustomer(app.currIndex, app)
+        app.currIndex+=1
+    
 def onMousePress(app, mouseX, mouseY):
     # if (mouseX, mouseY) in #any of the ingredient coordinates
 
