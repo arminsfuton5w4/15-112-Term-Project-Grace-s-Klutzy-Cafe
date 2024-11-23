@@ -28,11 +28,11 @@ layout=Layout([(1,4),(3,2),(3,8)])
 class Customer:
     def __init__(self, x, y):
             self.x, self.y = x,y
-            self.order=generateOrder(menu, allToppings)
+            self.orderBase, self.orderT1, self.orderT2=generateOrder(menu, allToppings)
             self.isAtTable=False
     
     def __repr__(self):
-        return f'{self.order}'
+        return f'{self.orderT1} {self.orderT2} {self.orderBase}'
     
     def customerPath(self,app):
         tables=layout.tables
@@ -181,17 +181,8 @@ def generateOrder(menu, allToppings):
     topping1=allToppings[random.randint(0,len(allToppings)-1)]
     toppings.remove(topping1)
     topping2=toppings[random.randint(0,len(toppings)-1)]
-    return f'{topping1} {topping2} {menu[random.randint(0,len(menu)-1)]}'
-
-def makeDish(order):
-    t1, t2, base=getIngredients(order)
-
-def getIngredients(order):
-    items=order.split()
-    topping1=items[0]
-    topping2=items[1]
-    base=items[2]
-    return (topping1, topping2, base) 
+    base=menu[random.randint(0,len(menu)-1)]
+    return (base, topping1, topping2)
 
 def getRevenue(menu,tip):
     pass
@@ -214,6 +205,7 @@ def onAppStart(app):
     app.translucence=0 #0: opacity=0, 1: opacity=50, 2: opacity=100
 
     app.ingredientSize=45
+    app.isDragging=False
 
 #VIEW
 def drawTable(app):
@@ -229,7 +221,7 @@ def drawOrderList(app):
     drawLabel('orders', 450, 45, bold=True)
     for i in range(len(app.customers)):
         customer=app.customers[i]
-        drawLabel({customer.order}, 450, 65+i*15, size=10)
+        drawLabel(f'{customer.orderT1} {customer.orderT2} {customer.orderBase}', 450, 65+i*15, size=10)
 
 def drawBoard(app):
     for row in range(app.rows):
@@ -252,6 +244,7 @@ def drawDisplay(app):
     drawRect(0, app.height-100, app.width, displayHeight, fill='blue', opacity=30)
 
 def redrawAll(app):
+    drawPolygon(70,250, 120,280, 210,220, 160,190)
     drawTable(app)
     drawOrderList(app)
     drawBoard(app)
@@ -262,7 +255,7 @@ def redrawAll(app):
     
     for customer in app.customers:
         drawRect(customer.x, customer.y, 50,100, fill='red', align='center')
-
+    
 #CONTROLLER
 
 def generateCustomer(app):
@@ -300,24 +293,36 @@ def clickedIngredient(mouseX, mouseY):
 def getIngredient(mouseX, mouseY):
     pass
 
+def isCurrOrder(erm):
+    pass
+
+###################################
+        # RAYCASTING??
+###################################
+
+def inCounter(mouseX, mouseY):
+
+    pass
+
 def onMousePress(app, mouseX, mouseY):
     if clickedIngredient(mouseX, mouseY):
-        getIngredient(mouseX, mouseY)
+        ingredient=getIngredient(mouseX, mouseY)
+
         app.translucence=1
         app.isDragging=True
 
     # if (mouseX, mouseY) in #table coordinates
 
-
 def onMouseDrag(app, mouseX, mouseY):
     if clickedIngredient(mouseX, mouseY):
-        getIngredient(mouseX, mouseY)
-
+        ingredient=getIngredient(mouseX, mouseY)
+        ingredient.x, ingredient.y=mouseX, mouseY
 
 def onMouseRelease(app, mouseX, mouseY):
-    if app.isCooking:
+    if inCounter(mouseX, mouseY):
+        #update Counter class with either...(1) Base, (2) Topping 1, (3) Topping 2
+        
         app.isDragging=False
-        app.translucence=2 
 
 def main():
     runApp()
