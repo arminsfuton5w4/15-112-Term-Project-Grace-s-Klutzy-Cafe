@@ -113,16 +113,15 @@ sunday=Base('sunday', 'cmu://903290/35264045/_+(4).jpeg', 40, 210, 6.75)
 milkTea=Base('milk-tea', 'cmu://903290/35227983/tokihyo_.jpeg', 90, 180, 5.50)
 baseSet={cakeRoll, crepeCake, sunday, milkTea}
 
-matcha=Toppings('matcha', 'cmu://903290/35266745/Trà+xanh+Matcha+Sencha+Gyokuro,+trà+xanh,+trà+Trung+Quốc,+món+ăn+png.jpeg',)
-strawberry=Toppings('strawberry', 'cmu://903290/35266755/⊹+⋆ﾟ꒰ఎ+♡+໒꒱+⋆ﾟ⊹.jpeg',)
-chocolate=Toppings('chocolate', 'cmu://903290/35266743/chocolate+png+#png.jpeg', )
-ube=Toppings('ube', 'cmu://903290/35266738/Okinawa+Sweet+Potato.jpeg',)
-redBean=Toppings('red-bean', 'cmu://903290/35266740/kidney+bean+organic+crops+red+kidney+beans.jpeg', )
-mango=Toppings('mango', 'cmu://903290/35266750/(xiaohongshu+ID_+DAZHI_BUKUN)+digital+art+cute+pfp+icon+kawaii+mango+fruit+dog.jpeg', )
+matcha=Toppings('matcha', 'cmu://903290/35266745/Trà+xanh+Matcha+Sencha+Gyokuro,+trà+xanh,+trà+Trung+Quốc,+món+ăn+png.jpeg',160, 70)
+strawberry=Toppings('strawberry', 'cmu://903290/35266755/⊹+⋆ﾟ꒰ఎ+♡+໒꒱+⋆ﾟ⊹.jpeg',210,50)
+chocolate=Toppings('chocolate', 'cmu://903290/35266743/chocolate+png+#png.jpeg',250,30)
+ube=Toppings('ube', 'cmu://903290/35266738/Okinawa+Sweet+Potato.jpeg',160,130)
+redBean=Toppings('red-bean', 'cmu://903290/35266740/kidney+bean+organic+crops+red+kidney+beans.jpeg',210,120)
+mango=Toppings('mango', 'cmu://903290/35266750/(xiaohongshu+ID_+DAZHI_BUKUN)+digital+art+cute+pfp+icon+kawaii+mango+fruit+dog.jpeg',250, 100)
 toppingSet={strawberry, mango, chocolate, ube, redBean, matcha}
 
 ingredientList=[cakeRoll, crepeCake, sunday, milkTea, strawberry, mango, chocolate, ube, redBean]
-
 
 menu=['cake-roll', 'milk-tea','sunday','crepe-cake']
 menuPrice ={'cake-roll':7.50, 'milk-tea':5.50, 'sunday':6.75, 'crepe-cake':8.00}
@@ -210,9 +209,8 @@ def generateOrder(menu, allToppings):
 def getRevenue(menu,tip):
     pass
 
-#table locations & boundaries    
-
 ################################################################################
+
 #MODEL
 def onAppStart(app):
     app.width, app.height = 800,500
@@ -227,9 +225,9 @@ def onAppStart(app):
     app.counter=0
     app.translucence=0 #0: opacity=0, 1: opacity=50, 2: opacity=100
 
-    app.ingredientSize=45
     app.isDragging=False
-    app.currItem
+    app.currItem=None
+    app.orderComplete=False
 
 #VIEW
 def drawTable(app):
@@ -282,7 +280,11 @@ def redrawAll(app):
 
     for base in baseSet:
         size=base.r*2
-        drawImage(base.link, base.x, base.y)
+        drawImage(base.image, base.x, base.y, align='center', width=size, height=size)
+    
+    for topping in toppingSet:
+        size=topping.r*2
+        drawImage(topping.image, topping.x, topping.y, align='center', width=size, height=size)
     
 #CONTROLLER
 
@@ -307,6 +309,23 @@ def moveCustomer(i, app):
         else:
             removeSeat(customer.x, customer.y, layout.tables)
 
+def whenOrderReady(app):
+    if app.orderComplete:
+        #replace all images on counter to image of final product
+        #have waitress hold the final product
+        #wait for player to click on a customer to send the order to
+        #if they walk to the wrong person...if they click on a new person(right or wrong)...
+        #...the waitress should redirect path to the new person
+        #if they walk to the right person, the order is DONE
+        pass
+    pass
+
+def whenOrderDone(app):
+    #when order is DONE, waitress makes her way back to the counter
+    #and waits (for the next order to be finished) or picks up the next order
+    #SIMULTANEOUSLY, customer with this order LEAVES
+    pass
+
 def onStep(app):
     app.counter+=1
     if app.counter%100==0 and len(app.customers)<3:
@@ -316,9 +335,9 @@ def onStep(app):
         moveCustomer(app.currIndex, app)
         app.currIndex+=1
 
-###################################
+################################################################################
         # POINT in POLYGON
-###################################
+################################################################################
 
 def pointInPolygon(coordinates, mouseX, mouseY):
     intersections=0
@@ -345,12 +364,14 @@ def clickedIngredient(mouseX, mouseY):
     return (None, False)
 
 def isCurrOrder(base, t1, t2):
-    #check if item is part of the current order
     for order in orderList.orders:
+        #check if the order is complete
+        if base==order.orderBase and t1==order.orderT1 and t2==order.orderT2:
+            app.orderComplete=True
+            orderList.order.remove(order)
+        #check if item is part of the current order
         if ((base in order) or (t1 in order) or (t2 in order)):
             return True
-    #check if the order is complete
-    pass
 
 def onMousePress(app, mouseX, mouseY):
     check=clickedIngredient(mouseX, mouseY)
