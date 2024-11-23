@@ -82,6 +82,7 @@ class Base:
         self.name=name
         self.image=link
         self.x, self.y=x,y
+        self.r=25
         self.price=price
     
     def __repr__(self):
@@ -95,6 +96,7 @@ class Toppings:
         self.name=name
         self.image=link
         self.x, self.y=x,y
+        self.r=25
     
     def __repr__(self):
         return f'{self.name}'  
@@ -105,21 +107,32 @@ class Toppings:
 def distance(x0,y0,x1,y1):
     return (((x1-x0)**2+(y1-y0)**2)**0.5)
 
-cakeRoll=Base('cake-roll', 'cmu://903290/33748782/0c726d7f441baf1ab17eb76c5f755f13.png',50,100, 7.50)
-crepeCake=Base('crepe-cake', 'cmu://903290/35264027/_+(5).jpeg',80, 80, 8.00)
-sunday=Base('sunday', 'cmu://903290/35264045/_+(4).jpeg', 50, 180, 6.75)
-milkTea=Base('milk-tea', 'cmu://903290/35227983/tokihyo_.jpeg', 80, 140, 5.50)
-baseList={cakeRoll, crepeCake, sunday, milkTea}
-# strawberry=Toppings('strawberry', '',)
-# mango=Toppings('mango', '', )
-# chocolate=Toppigns('chocolate', '', )
-# ube=Toppings('ube', '',)
-# redBean=Toppings('red-bean', '', )
+cakeRoll=Base('cake-roll', 'cmu://903290/33748782/0c726d7f441baf1ab17eb76c5f755f13.png',40, 140, 7.50)
+crepeCake=Base('crepe-cake', 'cmu://903290/35264027/_+(5).jpeg',90, 110, 8.00)
+sunday=Base('sunday', 'cmu://903290/35264045/_+(4).jpeg', 40, 210, 6.75)
+milkTea=Base('milk-tea', 'cmu://903290/35227983/tokihyo_.jpeg', 90, 180, 5.50)
+baseSet={cakeRoll, crepeCake, sunday, milkTea}
+
+matcha=Toppings('matcha', 'cmu://903290/35266745/Trà+xanh+Matcha+Sencha+Gyokuro,+trà+xanh,+trà+Trung+Quốc,+món+ăn+png.jpeg',)
+strawberry=Toppings('strawberry', 'cmu://903290/35266755/⊹+⋆ﾟ꒰ఎ+♡+໒꒱+⋆ﾟ⊹.jpeg',)
+chocolate=Toppings('chocolate', 'cmu://903290/35266743/chocolate+png+#png.jpeg', )
+ube=Toppings('ube', 'cmu://903290/35266738/Okinawa+Sweet+Potato.jpeg',)
+redBean=Toppings('red-bean', 'cmu://903290/35266740/kidney+bean+organic+crops+red+kidney+beans.jpeg', )
+mango=Toppings('mango', 'cmu://903290/35266750/(xiaohongshu+ID_+DAZHI_BUKUN)+digital+art+cute+pfp+icon+kawaii+mango+fruit+dog.jpeg', )
+toppingSet={strawberry, mango, chocolate, ube, redBean, matcha}
+
+ingredientList=[cakeRoll, crepeCake, sunday, milkTea, strawberry, mango, chocolate, ube, redBean]
 
 
 menu=['cake-roll', 'milk-tea','sunday','crepe-cake']
 menuPrice ={'cake-roll':7.50, 'milk-tea':5.50, 'sunday':6.75, 'crepe-cake':8.00}
 allToppings=['strawberry', 'mango', 'matcha', 'chocolate', 'ube', 'red-bean']
+
+class Orders:
+    def __init__(self):
+        self.orders=[]
+
+orderList=Orders()
 
 ################################################################################
         # DFS
@@ -190,7 +203,9 @@ def generateOrder(menu, allToppings):
     toppings.remove(topping1)
     topping2=toppings[random.randint(0,len(toppings)-1)]
     base=menu[random.randint(0,len(menu)-1)]
-    return (base, topping1, topping2)
+    order=(base, topping1, topping2)
+    orderList.orders.append(order)
+    return order
 
 def getRevenue(menu,tip):
     pass
@@ -214,6 +229,7 @@ def onAppStart(app):
 
     app.ingredientSize=45
     app.isDragging=False
+    app.currItem
 
 #VIEW
 def drawTable(app):
@@ -263,6 +279,10 @@ def redrawAll(app):
     
     for customer in app.customers:
         drawRect(customer.x, customer.y, 50,100, fill='red', align='center')
+
+    for base in baseSet:
+        size=base.r*2
+        drawImage(base.link, base.x, base.y)
     
 #CONTROLLER
 
@@ -316,30 +336,40 @@ def inCounter(mouseX, mouseY):
     coordinates=counter.coordinates
     return pointInPolygon(coordinates, mouseX, mouseY)
 
-#ingredients will just be square pictures
+#ingredients will just be circle pictures
 def clickedIngredient(mouseX, mouseY):
-    pass
+    for item in ingredientList:
+        d=distance(mouseX, mouseY, item.x, item.y)
+        if d<=item.r:
+            return (item, True)
+    return (None, False)
 
-def whichIngredient(mouseX, mouseY):
-    pass
-
-def isCurrOrder(erm):
+def isCurrOrder(base, t1, t2):
+    #check if item is part of the current order
+    for order in orderList.orders:
+        if ((base in order) or (t1 in order) or (t2 in order)):
+            return True
+    #check if the order is complete
     pass
 
 def onMousePress(app, mouseX, mouseY):
-    if clickedIngredient(mouseX, mouseY):
-        ingredient=whichIngredient(mouseX, mouseY)
+    check=clickedIngredient(mouseX, mouseY)
+    if check[1]:
         app.translucence=1
+        app.currItem=check[0]
         app.isDragging=True
     # if (mouseX, mouseY) in #table coordinates
 
 def onMouseDrag(app, mouseX, mouseY):
-    if clickedIngredient(mouseX, mouseY):
-        ingredient=whichIngredient(mouseX, mouseY)
-        ingredient.x, ingredient.y=mouseX, mouseY
+    ingredient=app.currItem[0]
+    ingredient.x, ingredient.y=mouseX, mouseY
 
 def onMouseRelease(app, mouseX, mouseY):
     if inCounter(mouseX, mouseY):
+        if app.currItem in baseSet:
+            counter.orderBase=app.currItem
+        elif app.currItem in toppingSet:
+            counter.orderT1=app.currItem
         #update Counter class with either...(1) Base, (2) Topping 1, (3) Topping 2
         if isCurrOrder(counter.orderBase, counter.orderT1, counter.orderT2):
             app.isDragging=False
