@@ -12,10 +12,19 @@ class Waitress:
     
     def draw(self, app):
         drawRect(self.x, self.y,50,100, fill='purple')
+    
+    def waitressPath(self, app):
+        tables=layout.filledSeats
+        visited=set()
+        state=(False, tables, [])
+        path=DFS(board, state, visited,())
+        pathCoord=graphToCoord(app, path)
+        return pathCoord
 
 class Layout:
     def __init__(self,tables):
         self.tables=tables
+        self.filledSeats=[]
     
     def isAtTable(self, other, app):
         x,y=coordToGraph(other.x, other.y)
@@ -30,6 +39,7 @@ class Customer:
             self.x, self.y = x,y
             self.orderBase, self.orderT1, self.orderT2=generateOrder(menu, allToppings)
             self.isAtTable=False
+            self.mood=3 #3=happy, 2=impatient, 1=angry
     
     def __repr__(self):
         return f'{self.orderT1} {self.orderT2} {self.orderBase}'
@@ -56,25 +66,16 @@ def coordToGraph(coordX, coordY):
     y=(coordY-200)//50
     return x,y
 
-class Ingredients:
-    def __init__(self):
-        self.ingredientList=dict()
-    
-    def addIngredients(self, other):
-        self.ingredientList[other]=(other.x, other.y)
-
-    def draw(self, app):
-        for i in range(len(self.ingredients)):
-            drawImage(self.image, 50+i*70, 150-i*35,50, fill='green')
-
 class Counter:
     def __init__(self):
         self.base=None
         self.topping1=None
         self.topping2=None
-        self.coordinates=()
+        self.coordinates=[(70,250), (120,280), (210,220), (160,190)]
 # after drag into counter --> they become the items
 # check 3 fields are field, display image
+
+counter=Counter()
 
 class Base:
     def __init__(self, name, link, x,y, price):
@@ -85,6 +86,9 @@ class Base:
     
     def __repr__(self):
         return f'{self.name}'
+    
+    def __hash__(self):
+        return hash(str(self)) 
 
 class Toppings:
     def __init__(self, name, link, x,y):
@@ -93,7 +97,10 @@ class Toppings:
         self.x, self.y=x,y
     
     def __repr__(self):
-        return f'{self.name}'   
+        return f'{self.name}'  
+
+    def __hash__(self):
+        return hash(str(self)) 
 
 def distance(x0,y0,x1,y1):
     return (((x1-x0)**2+(y1-y0)**2)**0.5)
@@ -102,6 +109,7 @@ cakeRoll=Base('cake-roll', 'cmu://903290/33748782/0c726d7f441baf1ab17eb76c5f755f
 crepeCake=Base('crepe-cake', 'cmu://903290/35264027/_+(5).jpeg',80, 80, 8.00)
 sunday=Base('sunday', 'cmu://903290/35264045/_+(4).jpeg', 50, 180, 6.75)
 milkTea=Base('milk-tea', 'cmu://903290/35227983/tokihyo_.jpeg', 80, 140, 5.50)
+baseList={cakeRoll, crepeCake, sunday, milkTea}
 # strawberry=Toppings('strawberry', '',)
 # mango=Toppings('mango', '', )
 # chocolate=Toppigns('chocolate', '', )
@@ -266,6 +274,7 @@ def removeSeat(coordX,coordY, tables):
     x,y=coordToGraph(coordX, coordY)
     if (y,x) in tables:
         tables.remove((y,x))
+    layout.filledSeats.append((y, x))
 
 def moveCustomer(i, app):
     for customer in app.customers:
@@ -286,43 +295,54 @@ def onStep(app):
     if app.counter%10==0 and len(app.customers)>0:
         moveCustomer(app.currIndex, app)
         app.currIndex+=1
-    
+
+###################################
+        # POINT in POLYGON
+###################################
+
+def pointInPolygon(coordinates, mouseX, mouseY):
+    intersections=0
+    for i in range(len(coordinates)-1):
+        p1, p2=coordinates[i], coordinates[i+1]
+        x1,y1=p1[0], p1[1]
+        x2,y2=p2[0], p2[1]
+        slope=((y2-y1)/(x2-x1))
+        x=(mouseY-y1+slope*x1)/slope
+        if x1<=x<=x2:
+            intersections+=1
+    return intersections%2==1
+
+def inCounter(mouseX, mouseY):
+    coordinates=counter.coordinates
+    return pointInPolygon(coordinates, mouseX, mouseY)
+
+#ingredients will just be square pictures
 def clickedIngredient(mouseX, mouseY):
     pass
 
-def getIngredient(mouseX, mouseY):
+def whichIngredient(mouseX, mouseY):
     pass
 
 def isCurrOrder(erm):
     pass
 
-###################################
-        # RAYCASTING??
-###################################
-
-def inCounter(mouseX, mouseY):
-
-    pass
-
 def onMousePress(app, mouseX, mouseY):
     if clickedIngredient(mouseX, mouseY):
-        ingredient=getIngredient(mouseX, mouseY)
-
+        ingredient=whichIngredient(mouseX, mouseY)
         app.translucence=1
         app.isDragging=True
-
     # if (mouseX, mouseY) in #table coordinates
 
 def onMouseDrag(app, mouseX, mouseY):
     if clickedIngredient(mouseX, mouseY):
-        ingredient=getIngredient(mouseX, mouseY)
+        ingredient=whichIngredient(mouseX, mouseY)
         ingredient.x, ingredient.y=mouseX, mouseY
 
 def onMouseRelease(app, mouseX, mouseY):
     if inCounter(mouseX, mouseY):
         #update Counter class with either...(1) Base, (2) Topping 1, (3) Topping 2
-        
-        app.isDragging=False
+        if isCurrOrder(counter.orderBase, counter.orderT1, counter.orderT2):
+            app.isDragging=False
 
 def main():
     runApp()
