@@ -22,7 +22,8 @@ class Layout:
         if (y, x) in self.tables:
             other.isAtTable=True
 
-layout=Layout([(0,4),(0,5),(1,4),(1,5), (2,1),(2,2),(3,1),(3,2), (2,7),(2,8),(3,7),(3,8)])
+layout2=Layout([(0,4),(0,5),(1,4),(1,5), (2,1),(2,2),(3,1),(3,2), (2,7),(2,8),(3,7),(3,8)])
+layout=Layout([(1,4),(3,1),(3,8)])
 
 class Customer:
     def __init__(self, x, y):
