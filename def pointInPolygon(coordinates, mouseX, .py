@@ -1,9 +1,14 @@
+import sys
+print(f'sudo "{sys.executable}" -m pip install pillow')
+print(f'sudo "{sys.executable}" -m pip install requests')
+
 def pointInPolygon(coordinates, mouseX, mouseY):
     intersections=0
-    for i in range(len(coordinates)-1):
-        p1, p2=coordinates[i], coordinates[i+1]
-        x1,y1=p1[0], p1[1]
-        x2,y2=p2[0], p2[1]
+    n=len(coordinates)
+    for i in range(n):
+        p1, p2=coordinates[i], coordinates[(i+1)%n]
+        x1,y1=p1
+        x2,y2=p2
         slope=((y2-y1)/(x2-x1))
         x=(mouseY-y1+slope*x1)/slope
         if x1<=x<=x2:

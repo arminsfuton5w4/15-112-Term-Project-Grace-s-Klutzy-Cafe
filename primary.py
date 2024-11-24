@@ -2,6 +2,7 @@ from cmu_graphics import *
 import random
 import copy
 from PIL import Image
+# from layout import * 
 
 ################################################################################
         # CLASSES
@@ -38,9 +39,10 @@ layout=Layout([(1,4),(3,2),(3,8)])
 class Customer:
     def __init__(self, x, y):
             self.x, self.y = x,y
-            self.orderBase, self.orderT1, self.orderT2=generateOrder(menu, allToppings)
+            self.orderBase, self.orderT1, self.orderT2=generateOrder()
             self.isAtTable=False
             self.mood=3 #3=happy, 2=impatient, 1=angry
+            # self.giveTip=self.orderBase.price*0.10
     
     def __repr__(self):
         return f'{self.orderT1} {self.orderT2} {self.orderBase}'
@@ -62,6 +64,14 @@ class Customer:
         path=state[-1]
         pathCoord=graphToCoord(app, path)
         return pathCoord
+    
+    def howMuchTip(self, tip, mood):
+        if self.mood==3:
+            return self.giveTip
+        elif self.mood==2:
+            return self.giveTip-self.giveTip*0.5
+        elif self.mood==1:
+            return self.giveTip-self.giveTip*0.8
 
 def graphToCoord(app, path):
     pathCoord=[]
@@ -88,12 +98,13 @@ class Counter:
 counter=Counter()
 
 class Base:
-    def __init__(self, name, link, x,y, price):
+    def __init__(self, name, link, x,y, price, ogXY):
         self.name=name
-        self.image=link
+        self.image=CMUImage(Image.open(link))
         self.x, self.y=x,y
         self.r=25
         self.price=price
+        self.ogXY=ogXY
     
     def __repr__(self):
         return f'{self.name}'
@@ -102,11 +113,12 @@ class Base:
         return hash(str(self)) 
 
 class Toppings:
-    def __init__(self, name, link, x,y):
+    def __init__(self, name, link, x,y, ogXY):
         self.name=name
-        self.image=link
+        self.image=CMUImage(Image.open(link))
         self.x, self.y=x,y
         self.r=25
+        self.ogXY=ogXY
     
     def __repr__(self):
         return f'{self.name}'  
@@ -117,21 +129,23 @@ class Toppings:
 def distance(x0,y0,x1,y1):
     return (((x1-x0)**2+(y1-y0)**2)**0.5)
 
-cakeRoll=Base('cake-roll', 'cmu://903290/33748782/0c726d7f441baf1ab17eb76c5f755f13.png',40, 140, 7.50)
-crepeCake=Base('crepe-cake', 'cmu://903290/35264027/_+(5).jpeg',90, 110, 8.00)
-sunday=Base('sunday', 'cmu://903290/35264045/_+(4).jpeg', 40, 210, 6.75)
-milkTea=Base('milk-tea', 'cmu://903290/35227983/tokihyo_.jpeg', 90, 180, 5.50)
+cakeRoll=Base('cake-roll', 'images/cakeRoll.jpeg',40, 140, 7.50, (40,140))
+crepeCake=Base('crepe-cake', 'images/crepeCake.jpeg',90, 110, 8.00, (90,110))
+sunday=Base('sunday', 'images/sunday.jpeg', 40, 210, 6.75, (40,210))
+milkTea=Base('milk-tea', 'images/boba.jpeg', 90, 180, 5.50, (90, 180))
+
 baseSet={cakeRoll, crepeCake, sunday, milkTea}
 
-matcha=Toppings('matcha', 'cmu://903290/35266745/Trà+xanh+Matcha+Sencha+Gyokuro,+trà+xanh,+trà+Trung+Quốc,+món+ăn+png.jpeg',160, 70)
-strawberry=Toppings('strawberry', 'cmu://903290/35266755/⊹+⋆ﾟ꒰ఎ+♡+໒꒱+⋆ﾟ⊹.jpeg',210,50)
-chocolate=Toppings('chocolate', 'cmu://903290/35266743/chocolate+png+#png.jpeg',250,30)
-ube=Toppings('ube', 'cmu://903290/35266738/Okinawa+Sweet+Potato.jpeg',160,130)
-redBean=Toppings('red-bean', 'cmu://903290/35266740/kidney+bean+organic+crops+red+kidney+beans.jpeg',210,120)
-mango=Toppings('mango', 'cmu://903290/35266750/(xiaohongshu+ID_+DAZHI_BUKUN)+digital+art+cute+pfp+icon+kawaii+mango+fruit+dog.jpeg',250, 100)
+matcha=Toppings('matcha', 'images/matcha.jpeg',160, 70, (160,70))
+strawberry=Toppings('strawberry', 'images/strawberry.jpeg',210,50, (210,50))
+chocolate=Toppings('chocolate', 'images/chocolate.jpeg',250,30, (250,30))
+ube=Toppings('ube', 'images/ube.jpeg',160,130, (160,130))
+redBean=Toppings('red-bean', 'images/red-bean.jpeg',210,120, (210,120))
+mango=Toppings('mango', 'images/mango.jpeg',250, 100, (250,100))
+
 toppingSet={strawberry, mango, chocolate, ube, redBean, matcha}
 
-ingredientList=[cakeRoll, crepeCake, sunday, milkTea, strawberry, mango, chocolate, ube, redBean]
+ingredientList=[cakeRoll, crepeCake, sunday, milkTea, strawberry, mango, chocolate, ube, redBean, matcha]
 
 menu=['cake-roll', 'milk-tea','sunday','crepe-cake']
 menuPrice ={'cake-roll':7.50, 'milk-tea':5.50, 'sunday':6.75, 'crepe-cake':8.00}
@@ -206,18 +220,26 @@ def finish(state, v):
         # OTHER
 ################################################################################
 
-def generateOrder(menu, allToppings):
-    toppings=copy.copy(allToppings)
-    topping1=allToppings[random.randint(0,len(allToppings)-1)]
-    toppings.remove(topping1)
-    topping2=toppings[random.randint(0,len(toppings)-1)]
-    base=menu[random.randint(0,len(menu)-1)]
+def generateOrder():
+    toppings=list(toppingSet)
+    topping1=toppings[random.randint(0,len(toppings)-1)]
+    remaining_toppings=[topping for topping in toppings if topping!=topping1]
+    topping2=remaining_toppings[random.randint(0,len(remaining_toppings)-1)]
+    base=(list(baseSet))[random.randint(0,len(baseSet)-1)]
     order=(base, topping1, topping2)
     orderList.orders.append(order)
     return order
 
+class Revenue:
+    def __init__(self):
+        self.tip=0
+        self.earning=0
+        self.total=self.tip+self.total
+
 def getRevenue(menu,tip):
-    pass
+    for order in orderList:
+        pass
+    #revenue system for tipping
 
 ################################################################################
 
@@ -233,7 +255,6 @@ def onAppStart(app):
     app.StepsPerSecond=1
     app.currIndex=0
     app.counter=0
-    app.translucence=0 #0: opacity=0, 1: opacity=50, 2: opacity=100
 
     app.isDragging=False
     app.currItem=None
@@ -276,7 +297,7 @@ def drawDisplay(app):
     drawRect(0, app.height-100, app.width, displayHeight, fill='blue', opacity=30)
 
 def redrawAll(app):
-    drawPolygon(70,250, 120,280, 210,220, 160,190)
+    drawPolygon(70,250, 120,280, 210,220, 160,190, fill='lavender')
     drawTable(app)
     drawOrderList(app)
     drawBoard(app)
@@ -313,7 +334,6 @@ def moveCustomer(i, app):
         layout.isAtTable(customer, app)
         if not customer.isAtTable:
             pathCoord=customer.customerPath(app)
-            print('not at table:', customer)
             i%=len(pathCoord)
             customer.x, customer.y=pathCoord[i][0], pathCoord[i][1]
         else:
@@ -321,6 +341,13 @@ def moveCustomer(i, app):
 
 def whenOrderReady(app):
     if app.orderComplete:
+        #ingredients move back to original position (track original position)
+        counter.base.x, counter.base.y=counter.base.ogXY
+        counter.topping1.x, counter.topping1.y=counter.topping1.ogXY
+        counter.topping2.x, counter.topping2.y=counter.topping2.ogXY
+        #all counter attributes are reset back to none
+        counter.base, counter.topping1, counter.topping2=None, None, None
+
         #replace all images on counter to image of final product
         #have waitress hold the final product
         #wait for player to click on a customer to send the order to
@@ -338,12 +365,14 @@ def whenOrderDone(app):
 
 def onStep(app):
     app.counter+=1
-    if app.counter%500==0 and len(app.customers)<3:
+    if app.counter%200==0 and len(app.customers)<3:
         print(app.customers)
         generateCustomer(app)
+        app.isCooking=True
     if app.counter%10==0 and len(app.customers)>0:
         moveCustomer(app.currIndex, app)
         app.currIndex+=1
+    whenOrderReady(app)
 
 ################################################################################
         # POINT in POLYGON
@@ -373,37 +402,61 @@ def clickedIngredient(mouseX, mouseY):
             return (item, True)
     return (None, False)
 
-def isCurrOrder(base, t1, t2):
-    for order in orderList.orders:
-        #check if the order is complete
-        if base==order.orderBase and t1==order.orderT1 and t2==order.orderT2:
-            app.orderComplete=True
-            orderList.order.remove(order)
-        #check if item is part of the current order
-        if ((base in order) or (t1 in order) or (t2 in order)):
-            return True
+def isCurrOrderComplete(base, t1, t2, app):
+    print('base:', base, 't1:', t1, 't2:', t2)
+    currOrder=orderList.orders[0]
+    #check if the order is complete
+    if base==currOrder[0] and (t1==currOrder[1] or t1==currOrder[2]) and (t2==currOrder[2] or t2==currOrder[1]):
+        app.orderComplete=True
+        orderList.order.pop(0)
+        print('order is complete!')
+        return True
+
+def isInCurrOrder(currItem):
+    currOrder=orderList.orders[0]
+    print('current order is:', currOrder)
+    if currItem in currOrder:
+        return True
+    return False
+    #check if item is part of the current order
 
 def onMousePress(app, mouseX, mouseY):
-    check=clickedIngredient(mouseX, mouseY)
-    if check[1]:
-        app.translucence=1
-        app.currItem=check[0]
-        app.isDragging=True
+    if app.isCooking:
+        check=clickedIngredient(mouseX, mouseY)
+        if check[1]:
+            app.currItem=check[0]
+            app.isDragging=True
     # if (mouseX, mouseY) in #table coordinates
 
 def onMouseDrag(app, mouseX, mouseY):
-    ingredient=app.currItem[0]
-    ingredient.x, ingredient.y=mouseX, mouseY
+    if app.isCooking:
+        ingredient=app.currItem
+        if ingredient!=None:
+            ingredient.x, ingredient.y=mouseX, mouseY
 
 def onMouseRelease(app, mouseX, mouseY):
-    if inCounter(mouseX, mouseY):
-        if app.currItem in baseSet:
-            counter.orderBase=app.currItem
-        elif app.currItem in toppingSet:
-            counter.orderT1=app.currItem
-        #update Counter class with either...(1) Base, (2) Topping 1, (3) Topping 2
-        if isCurrOrder(counter.orderBase, counter.orderT1, counter.orderT2):
-            app.isDragging=False
+    if app.isCooking:
+        if inCounter(mouseX, mouseY):
+            if app.currItem in baseSet:
+                counter.base=app.currItem
+                print('base:', counter.base)
+            elif app.currItem in toppingSet and counter.topping1==None:
+                counter.topping1=app.currItem
+                print('t1:', counter.topping1)
+            elif app.currItem in toppingSet:
+                counter.topping2=app.currItem
+                print('t2:', counter.topping2)
+            if isInCurrOrder(app.currItem):
+                print('it belongs to the order!')
+                app.currItem.x, app.currItem.y=mouseX, mouseY
+            else:
+                print('not part of the order!')
+                app.currItem.x, app.currItem.y=app.currItem.ogXY
+            isCurrOrderComplete(counter.base, counter.topping1, counter.topping2)
+        else:
+            ingredient=app.currItem
+            if ingredient!=None: 
+                app.currItem.x, app.currItem.y=app.currItem.ogXY
 
 def main():
     runApp()
