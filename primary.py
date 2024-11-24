@@ -52,6 +52,9 @@ class Customer:
         path=state[-1]
         pathCoord=graphToCoord(app, path)
         return pathCoord
+    
+    def customerLeave(self,app):
+        state=(False, (0,9))
 
 def graphToCoord(app, path):
     pathCoord=[]
