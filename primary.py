@@ -331,7 +331,7 @@ def whenOrderReady(app):
     pass
 
 def whenOrderDone(app):
-    #when order is DONE, waitress makes her way back to the counter
+    #when order is DONE, waitress makes her way BACK to the counter
     #and waits (for the next order to be finished) or picks up the next order
     #SIMULTANEOUSLY, customer with this order LEAVES
     pass
