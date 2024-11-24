@@ -1,6 +1,7 @@
 from cmu_graphics import *
 import random
 import copy
+from PIL import Image
 
 ################################################################################
         # CLASSES
@@ -54,7 +55,13 @@ class Customer:
         return pathCoord
     
     def customerLeave(self,app):
-        state=(False, (0,9))
+        visited=set()
+        state=(False, (0,9), [])
+        x,y=coordToGraph(self.x, self.y)
+        path=DFS(board, state, visited, (y,x))
+        path=state[-1]
+        pathCoord=graphToCoord(app, path)
+        return pathCoord
 
 def graphToCoord(app, path):
     pathCoord=[]
@@ -331,7 +338,7 @@ def whenOrderDone(app):
 
 def onStep(app):
     app.counter+=1
-    if app.counter%100==0 and len(app.customers)<3:
+    if app.counter%500==0 and len(app.customers)<3:
         print(app.customers)
         generateCustomer(app)
     if app.counter%10==0 and len(app.customers)>0:
