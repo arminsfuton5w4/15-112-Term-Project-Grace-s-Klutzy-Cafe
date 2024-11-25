@@ -11,6 +11,7 @@ from PIL import Image
 class Waitress:
     def __init__(self, x, y):
         self.x, self.y = x,y
+        self.image=None
     
     def draw(self, app):
         drawRect(self.x, self.y,50,100, fill='purple')
@@ -308,6 +309,7 @@ def redrawAll(app):
     w.draw(app)
     
     for customer in app.customers:
+        print(customer.x, customer.y)
         drawRect(customer.x, customer.y, 50,100, fill='red', align='center')
 
     for base in baseSet:
@@ -334,7 +336,7 @@ def moveCustomer(i, app):
     for customer in app.customers:
         layout.isAtTable(customer, app)
         if not customer.isAtTable:
-            print('customer.x, customer.y:',customer.x, customer.y)
+            # print('customer.x, customer.y:',customer.x, customer.y)
             pathCoord=customer.customerPath(app)
             i%=len(pathCoord)
             customer.x, customer.y=pathCoord[i][0], pathCoord[i][1]
@@ -437,10 +439,10 @@ def onMousePress(app, mouseX, mouseY):
         if check[1]:
             app.currItem=check[0]
             app.isDragging=True
-    if app.goServe:
-        checkPerson=clickedPerson(mouseX, mouseY)
-        if checkPerson[1]:
-            pass
+    # if app.goServe:
+    #     checkPerson=clickedPerson(mouseX, mouseY)
+    #     if checkPerson[1]:
+    #         pass
     # if (mouseX, mouseY) in #filledSeat coordinate
 
 def onMouseDrag(app, mouseX, mouseY):
