@@ -259,6 +259,7 @@ def onAppStart(app):
     app.isDragging=False
     app.currItem=None
     app.orderComplete=False
+    app.goServe=False
 
 #VIEW
 def drawTable(app):
@@ -333,6 +334,7 @@ def moveCustomer(i, app):
     for customer in app.customers:
         layout.isAtTable(customer, app)
         if not customer.isAtTable:
+            print('customer.x, customer.y:',customer.x, customer.y)
             pathCoord=customer.customerPath(app)
             i%=len(pathCoord)
             customer.x, customer.y=pathCoord[i][0], pathCoord[i][1]
@@ -352,7 +354,6 @@ def whenOrderReady(app):
 
         #replace all images on counter to image of final product
         
-
         #have waitress hold the final product image
         #wait for player to click on a customer to send the order to
         #if they walk to the wrong person...if they click on a new person(right or wrong)...
@@ -376,6 +377,8 @@ def onStep(app):
     if app.counter%10==0 and len(app.customers)>0:
         moveCustomer(app.currIndex, app)
         app.currIndex+=1
+    if orderList.orders==[]:
+        app.isCooking=False
 
 ################################################################################
         # POINT in POLYGON
@@ -411,6 +414,7 @@ def isCurrOrderComplete(base, t1, t2, app):
     #check if the order is complete
     if base==currOrder[0] and (t1==currOrder[1] or t1==currOrder[2]) and (t2==currOrder[2] or t2==currOrder[1]):
         app.orderComplete=True
+        app.goServe=True
         orderList.orders.pop(0)
         print('order is complete!')
         whenOrderReady(app)
@@ -424,13 +428,20 @@ def isInCurrOrder(currItem):
     return False
     #check if item is part of the current order
 
+def clickedPerson(mouseX, mouseY):
+    pass
+
 def onMousePress(app, mouseX, mouseY):
     if app.isCooking:
         check=clickedIngredient(mouseX, mouseY)
         if check[1]:
             app.currItem=check[0]
             app.isDragging=True
-    # if (mouseX, mouseY) in #table coordinates
+    if app.goServe:
+        checkPerson=clickedPerson(mouseX, mouseY)
+        if checkPerson[1]:
+            pass
+    # if (mouseX, mouseY) in #filledSeat coordinate
 
 def onMouseDrag(app, mouseX, mouseY):
     if app.isCooking:

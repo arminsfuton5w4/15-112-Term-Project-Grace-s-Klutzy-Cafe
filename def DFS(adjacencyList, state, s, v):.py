@@ -19,6 +19,8 @@ def visit(state, v):
     return (b, target, L)
     
 def revisit(state, v):
+    b,target,L=state
+    # L.append(v)
     return state
 
 def finish(state, v):
@@ -53,7 +55,8 @@ def makeAdjacencyList():
 
 board=makeAdjacencyList()
 tables=[(0,4),(0,5),(1,4),(1,5), (2,1),(2,2),(3,1),(3,2), (2,7),(2,8),(3,7),(3,8)]
+tables2=[(0,4),(0,5),(1,4),(1,5), (2,1),(2,2),(3,1),(3,2)]
 visited=set()
-state=(False, tables, [])
+state=(False, tables2, [])
 DFS(board, state, visited, (0,9))
 print(state[-1])
