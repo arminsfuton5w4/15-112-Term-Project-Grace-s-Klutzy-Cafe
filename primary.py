@@ -342,14 +342,18 @@ def moveCustomer(i, app):
 def whenOrderReady(app):
     if app.orderComplete:
         #ingredients move back to original position (track original position)
-        counter.base.x, counter.base.y=counter.base.ogXY
-        counter.topping1.x, counter.topping1.y=counter.topping1.ogXY
-        counter.topping2.x, counter.topping2.y=counter.topping2.ogXY
+        orderBase, orderT1, orderT2 =counter.base, counter.topping1, counter.topping2
+        orderBase.x, orderBase.y=orderBase.ogXY
+        orderT1.x, orderT1.y=orderT1.ogXY
+        orderT2.x, orderT2.y=orderT2.ogXY
+  
         #all counter attributes are reset back to none
         counter.base, counter.topping1, counter.topping2=None, None, None
 
         #replace all images on counter to image of final product
-        #have waitress hold the final product
+        
+
+        #have waitress hold the final product image
         #wait for player to click on a customer to send the order to
         #if they walk to the wrong person...if they click on a new person(right or wrong)...
         #...the waitress should redirect path to the new person
@@ -372,7 +376,6 @@ def onStep(app):
     if app.counter%10==0 and len(app.customers)>0:
         moveCustomer(app.currIndex, app)
         app.currIndex+=1
-    whenOrderReady(app)
 
 ################################################################################
         # POINT in POLYGON
@@ -408,8 +411,9 @@ def isCurrOrderComplete(base, t1, t2, app):
     #check if the order is complete
     if base==currOrder[0] and (t1==currOrder[1] or t1==currOrder[2]) and (t2==currOrder[2] or t2==currOrder[1]):
         app.orderComplete=True
-        orderList.order.pop(0)
+        orderList.orders.pop(0)
         print('order is complete!')
+        whenOrderReady(app)
         return True
 
 def isInCurrOrder(currItem):
@@ -452,7 +456,7 @@ def onMouseRelease(app, mouseX, mouseY):
             else:
                 print('not part of the order!')
                 app.currItem.x, app.currItem.y=app.currItem.ogXY
-            isCurrOrderComplete(counter.base, counter.topping1, counter.topping2)
+            isCurrOrderComplete(counter.base, counter.topping1, counter.topping2, app)
         else:
             ingredient=app.currItem
             if ingredient!=None: 
