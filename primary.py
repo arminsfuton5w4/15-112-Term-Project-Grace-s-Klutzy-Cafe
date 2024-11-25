@@ -159,7 +159,7 @@ class Orders:
 orderList=Orders()
 
 ################################################################################
-        # DFS
+        # DFS - Assisted by TA Lukas (lkebulad)
 ################################################################################
 
 def makeAdjacencyList():
@@ -309,7 +309,6 @@ def redrawAll(app):
     w.draw(app)
     
     for customer in app.customers:
-        print(customer.x, customer.y)
         drawRect(customer.x, customer.y, 50,100, fill='red', align='center')
 
     for base in baseSet:
