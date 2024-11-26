@@ -1,3 +1,5 @@
+#written w/ assistance from Lukas (lkebulad)
+
 def DFS(adjacencyList, state, s, v):
     b,target,L=state
     if v in s:
@@ -5,26 +7,35 @@ def DFS(adjacencyList, state, s, v):
     else:
         state=visit(state, v)
         s.add(v)
+        # c = 0 
         for neighbor in adjacencyList.get(v,[]):
+            # if c >= 3: 
+            #     L.append((neighbor, 'here'))
+            # if neighbor not in s:
+            #     L.append((v, 'here'))
             state=DFS(adjacencyList, state, s, neighbor)
+            # c += 1
         state=finish(state, v)
     return state
 
 def visit(state, v): 
     b,target,L=state
     if not b:
-        L.append(v)
+        L.append((v, 'visit'))
     if v in target:
         b=True
     return (b, target, L)
     
 def revisit(state, v):
-    b,target,L=state
-    # L.append(v)
     return state
 
 def finish(state, v):
-    return state
+    b,target,L=state
+    if not b:
+        L.append((v, 'finish'))
+    if v in target:
+        b=True
+    return (b, target, L)
 
 def makeAdjacencyList():
     adjList=dict()
@@ -60,3 +71,27 @@ visited=set()
 state=(False, tables2, [])
 DFS(board, state, visited, (0,9))
 print(state[-1])
+
+################################################################################
+        # DFS ATTEMPT 2 AHHHHHHHHHHHHHHHHHH CRYYYY
+################################################################################
+
+seen=[]
+result=[]
+
+def backtrackDFS(start, adjacencyList, result, target, seen):
+    if bc:
+        return result
+    else:
+        for neighbor in adjacencyList.get(start, []):
+            seen.append(neighbor)
+            if isLegal(neighbor, adjacencyList, target):
+                result.append(neighbor)
+                solution=backtrackDFS(start, adjacencyList, result, target, seen)
+                if solution !=None:
+                    return solution
+                result.pop()
+        return None
+
+def isLegal(neighbor):
+    pass

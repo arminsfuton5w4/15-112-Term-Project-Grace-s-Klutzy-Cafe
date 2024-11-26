@@ -42,7 +42,7 @@ class Customer:
             self.x, self.y = x,y
             self.orderBase, self.orderT1, self.orderT2=generateOrder()
             self.isAtTable=False
-            self.mood=3 #3=happy, 2=impatient, 1=angry
+            self.time=10
             # self.giveTip=self.orderBase.price*0.10
     
     def __repr__(self):
@@ -215,7 +215,12 @@ def revisit(state, v):
     return state
 
 def finish(state, v):
-    return state
+    b,target,L=state
+    if not b:
+        L.append(v)
+    if v in target:
+        b=True
+    return (b, target, L)
 
 ################################################################################
         # OTHER
@@ -229,6 +234,7 @@ def generateOrder():
     base=(list(baseSet))[random.randint(0,len(baseSet)-1)]
     order=(base, topping1, topping2)
     orderList.orders.append(order)
+    print(orderList.orders)
     return order
 
 class Revenue:
@@ -238,7 +244,7 @@ class Revenue:
         self.total=self.tip+self.total
 
 def getRevenue(menu,tip):
-    for order in orderList:
+    for order in orderList.orders:
         pass
     #revenue system for tipping
 
@@ -275,6 +281,7 @@ def drawOrderList(app):
     drawRect(375, 25, 150, 160, fill='blue', opacity=30)
     drawLabel('orders', 450, 45, bold=True)
     for i in range(len(app.customers)):
+        # base, topping1, topping2 =orderList[i]
         customer=app.customers[i]
         drawLabel(f'{customer.orderT1} {customer.orderT2} {customer.orderBase}', 450, 65+i*15, size=10)
 
@@ -310,6 +317,7 @@ def redrawAll(app):
     
     for customer in app.customers:
         drawRect(customer.x, customer.y, 50,100, fill='red', align='center')
+        drawLabel(customer.time, customer.x, customer.y)
 
     for base in baseSet:
         size=base.r*2
@@ -369,20 +377,30 @@ def whenOrderDone(app):
     #SIMULTANEOUSLY, customer with this order LEAVES
     pass
 
+def countDown(app):
+    for customer in app.customers:
+        if customer.time<=0 and orderList.orders!=[]:
+            customer.customerLeave(app)
+            orderList.orders.pop(0)
+        else:
+            customer.time-=0.5
+
 def onStep(app):
     app.counter+=1
     if app.counter%200==0 and len(app.customers)<3:
         print(app.customers)
         generateCustomer(app)
         app.isCooking=True
+    if orderList.orders==[]:
+        app.isCooking=False
     if app.counter%10==0 and len(app.customers)>0:
         moveCustomer(app.currIndex, app)
         app.currIndex+=1
-    if orderList.orders==[]:
-        app.isCooking=False
+        countDown(app)
 
 ################################################################################
-        # POINT in POLYGON
+        # POINT in POLYGON    
+        # general concept + math explained by TA, wrote code myself 
 ################################################################################
 
 def pointInPolygon(coordinates, mouseX, mouseY):
