@@ -32,12 +32,12 @@ class Layout:
         self.filledSeats=[]
     
     def isAtTable(self, other):
-        x,y=coordToNode(other.x, other.y)
+        x,y=coordToNode(other.x, other.y, app)
         if (y, x) in self.tables:
             other.isAtTable=True
     
     def isWaitressAtNode(self, other, app, target):
-        x,y=coordToNode(other.x, other.y)
+        x,y=coordToNode(other.x, other.y, app)
         if (y, x) in self.filledSeats:
             other.isWaitressAtNode=True
 
@@ -51,7 +51,7 @@ class Customer:
         self.isAtTable=False
         self.time=10
         self.giveTip=self.orderBase.price*0.10
-        self.state=self.timeToLeave()
+        # self.state=self.timeToLeave()
     
     def __repr__(self):
         return f'{self.orderT1} {self.orderT2} {self.orderBase}'
@@ -84,13 +84,13 @@ class Customer:
         else:
             return 0
     
-    def timeToLeave(self):
-        if self.time==0 or ateMyOrder():
-            return True
-        return False
+#     def timeToLeave(self):
+#         if self.time==0 or ateMyOrder(app):
+#             return True
+#         return False
 
-def ateMyOrder(app):
-    return app.orderDelivered
+# def ateMyOrder(app):
+#     return app.orderDelivered
 
 def nodeToCoord(app, path):
     pathCoord=[]
