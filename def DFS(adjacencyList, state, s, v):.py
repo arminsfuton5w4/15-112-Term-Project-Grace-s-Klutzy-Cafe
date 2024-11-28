@@ -1,4 +1,4 @@
-#written w/ assistance from Lukas (lkebulad)
+# written w/ assistance from Lukas (lkebulad)
 
 def DFS(adjacencyList, state, s, v):
     b,target,L=state
@@ -7,14 +7,10 @@ def DFS(adjacencyList, state, s, v):
     else:
         state=visit(state, v)
         s.add(v)
-        # c = 0 
         for neighbor in adjacencyList.get(v,[]):
-            # if c >= 3: 
-            #     L.append((neighbor, 'here'))
-            # if neighbor not in s:
-            #     L.append((v, 'here'))
             state=DFS(adjacencyList, state, s, neighbor)
-            # c += 1
+            if neighbor not in s:
+                L.append((v, 'here'))
         state=finish(state, v)
     return state
 
