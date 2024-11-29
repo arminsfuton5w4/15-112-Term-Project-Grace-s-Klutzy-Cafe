@@ -52,7 +52,7 @@ class Layout:
     def isAtExit(self, other, target):
         x,y=coordToNode(other.x, other.y)
         if (y, x) == target:
-            other.isWaitressAtNode=True
+            other.isAtExit=True
 
 layout2=Layout([(0,4),(0,5),(1,4),(1,5), (2,1),(2,2),(3,1),(3,2), (2,7),(2,8),(3,7),(3,8)])
 layout=Layout([(1,4),(3,2),(3,8)])
@@ -175,9 +175,7 @@ toppingSet={strawberry, mango, chocolate, ube, redBean, matcha}
 
 ingredientList=[cakeRoll, crepeCake, sunday, milkTea, strawberry, mango, chocolate, ube, redBean, matcha]
 
-menu=['cake-roll', 'milk-tea','sunday','crepe-cake']
 menuPrice ={'cake-roll':7.50, 'milk-tea':5.50, 'sunday':6.75, 'crepe-cake':8.00}
-allToppings=['strawberry', 'mango', 'matcha', 'chocolate', 'ube', 'red-bean']
 
 class Orders:
     def __init__(self):
@@ -189,8 +187,6 @@ orderList=Orders()
 class finalOrders:
     def __init__(self, base, t1, t2, link):
         self.link=link
-
-
 
 ################################################################################
         # DFS
@@ -267,10 +263,12 @@ def generateOrder():
     topping1=toppings[random.randint(0,len(toppings)-1)]
     remaining_toppings=[topping for topping in toppings if topping!=topping1]
     topping2=remaining_toppings[random.randint(0,len(remaining_toppings)-1)]
+    
     base=(list(baseSet))[random.randint(0,len(baseSet)-1)]
     order=(base, topping1, topping2)
     orderList.orders.append(order)
     print(orderList.orders)
+    
     return order
 
 class Revenue:
@@ -306,6 +304,7 @@ def onAppStart(app):
     app.clickedPerson=None
     app.goServe=False
     app.orderDelivered=False
+    app.showMenu=False
 
 #VIEW
 def drawTable(app):
@@ -322,9 +321,10 @@ def drawOrderList(app):
     for i in range(len(app.customers)):
         customer=app.customers[i]
         drawLabel(f'{customer.orderT1} {customer.orderT2} {customer.orderBase}', 450, 65+i*15, size=10)
-#############################################################################
+
+################################################################################
     #Draw board functions referenced my code from Tetris
-#############################################################################
+################################################################################
 def drawBoard(app):
     for row in range(app.rows):
         for col in range(app.cols):
@@ -343,9 +343,8 @@ def drawCell(app, rows, col):
 
 def drawDisplay(app):
     drawImage('images/display.PNG', 0,0, width=app.width, height=app.height)
-    
-
     #display revenue
+    #display 
 
 def redrawAll(app):
    
@@ -371,7 +370,11 @@ def redrawAll(app):
         size=topping.r*2
         drawImage(topping.image, topping.x, topping.y, align='center', width=size, height=size)
     drawTable(app)
-    
+
+    if app.showMenu:
+        drawImage('images/menu.PNG', 0, 0, width=app.width,height=app.height, opacity=95)
+
+
 #CONTROLLER
 
 def generateCustomer(app):
@@ -544,6 +547,7 @@ def moveWaitress(i, app, waitress):
         pathCoord=waitress.waitressPath((0,0), target)
         i%=len(pathCoord)
         waitress.x, waitress.y=pathCoord[i][0], pathCoord[i][1]
+        print('not at node yet!')
     else:
         #check if waitress order matches customer order
         print('reached node!')
@@ -570,6 +574,16 @@ def onMousePress(app, mouseX, mouseY):
             if checkPerson[1]:
                 app.goServe=True
                 app.clickedPerson=checkPerson[0]
+    if insideMenuButton(mouseX, mouseY, app):
+        app.showMenu=True
+
+def insideMenuButton(mouseX, mouseY, app):
+    buttonLeft, buttonTop, buttonSize=(app.width-75), 60,50
+    right=buttonLeft+buttonSize
+    bottom=buttonTop+buttonSize
+    if (buttonLeft<=mouseX<=right) and (buttonTop<=mouseY<=bottom):
+        return True
+
 
 def onMouseDrag(app, mouseX, mouseY):
     if app.isCooking:
@@ -580,6 +594,7 @@ def onMouseDrag(app, mouseX, mouseY):
 def onMouseRelease(app, mouseX, mouseY):
     if app.isCooking:
         if inCounter(mouseX, mouseY):
+            #Checks for property of currItem - base or topping - & updates counter
             if app.currItem in baseSet:
                 counter.base=app.currItem
                 print('base:', counter.base)
@@ -589,6 +604,8 @@ def onMouseRelease(app, mouseX, mouseY):
             elif app.currItem in toppingSet:
                 counter.topping2=app.currItem
                 print('t2:', counter.topping2)
+
+            #Checks if the currItem is in the currOrder
             if isInCurrOrder(app.currItem):
                 print('it belongs to the order!')
                 app.currItem.x, app.currItem.y=mouseX, mouseY
@@ -597,9 +614,10 @@ def onMouseRelease(app, mouseX, mouseY):
                 app.currItem.x, app.currItem.y=app.currItem.ogXY
             isCurrOrderComplete(counter.base, counter.topping1, counter.topping2, app)
         else:
-            ingredient=app.currItem
-            if ingredient!=None: 
+            if app.currItem!=None: 
                 app.currItem.x, app.currItem.y=app.currItem.ogXY
+    if app.showMenu:
+        app.showMenu=False
 
 def main():
     runApp()
