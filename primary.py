@@ -322,7 +322,9 @@ def drawOrderList(app):
     for i in range(len(app.customers)):
         customer=app.customers[i]
         drawLabel(f'{customer.orderT1} {customer.orderT2} {customer.orderBase}', 450, 65+i*15, size=10)
-
+#############################################################################
+    #Draw board functions referenced my code from Tetris
+#############################################################################
 def drawBoard(app):
     for row in range(app.rows):
         for col in range(app.cols):
@@ -341,11 +343,14 @@ def drawCell(app, rows, col):
 
 def drawDisplay(app):
     drawImage('images/display.PNG', 0,0, width=app.width, height=app.height)
+    
+
+    #display revenue
 
 def redrawAll(app):
    
     drawImage('images/backdrop.PNG', 0,0, width=app.width, height=app.height+10)
-    drawPolygon(70,250, 120,280, 210,220, 160,190, fill='lavender')
+    # drawPolygon(70,250, 120,280, 210,220, 160,190, fill='lavender')
 
     # drawTable(app)
     drawOrderList(app)
