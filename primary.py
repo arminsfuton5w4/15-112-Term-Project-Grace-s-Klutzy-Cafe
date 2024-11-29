@@ -16,7 +16,7 @@ class Waitress:
         self.isBackAtCounter=False
     
     def draw(self, app):
-        drawRect(self.x, self.y,50,100, fill='purple')
+        drawImage('images/gothicWaitress.PNG',self.x, self.y,width=125,height=145)
     
     def waitressPath(self, start, target):
         visited=set()
@@ -166,7 +166,7 @@ baseSet={cakeRoll, crepeCake, sunday, milkTea}
 
 matcha=Toppings('matcha', 'images/matcha.PNG',175, 60, (175,60))
 strawberry=Toppings('strawberry', 'images/strawberry.PNG',215,45, (215,45))
-chocolate=Toppings('chocolate', 'images/chocolate.PNG',252,28, (252,328))
+chocolate=Toppings('chocolate', 'images/chocolate.PNG',252,28, (252,28))
 ube=Toppings('ube', 'images/ube.PNG',175,128, (175,128))
 redBean=Toppings('red-bean', 'images/redBean.PNG',215,115, (215,115))
 mango=Toppings('mango', 'images/mango.PNG',252, 90, (252,90))
@@ -340,12 +340,11 @@ def drawCell(app, rows, col):
              fill=None, border='black', borderWidth=0.15)   
 
 def drawDisplay(app):
-    displayHeight=200
-    drawRect(0, app.height-100, app.width, displayHeight, fill='blue', opacity=30)
+    drawImage('images/display.PNG', 0,0, width=app.width, height=app.height)
 
 def redrawAll(app):
    
-    drawImage('images/backdrop.PNG', 0,0, width=app.width, height=app.height)
+    drawImage('images/backdrop.PNG', 0,0, width=app.width, height=app.height+10)
     drawPolygon(70,250, 120,280, 210,220, 160,190, fill='lavender')
 
     # drawTable(app)
@@ -356,7 +355,7 @@ def redrawAll(app):
     waitressG.draw(app)
     
     for customer in app.customers:
-        drawRect(customer.x, customer.y, 50,100, fill='red', align='center')
+        drawImage('images/blueBunny.PNG', customer.x, customer.y, width=50,height=100, align='center')
         drawLabel(customer.time, customer.x, customer.y)
 
     for base in baseSet:
@@ -542,8 +541,10 @@ def moveWaitress(i, app, waitress):
         waitress.x, waitress.y=pathCoord[i][0], pathCoord[i][1]
     else:
         #check if waitress order matches customer order
+        print('reached node!')
         if waitress.whichOrder==orderList.finisihed[0]:
             app.orderDelivered=True
+        app.goServe=False
 
 def goBackCounter(i, waitress):
     if not layout.isBackAtCounter(waitress, (0,0)):
