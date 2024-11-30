@@ -15,7 +15,7 @@ class Waitress:
         self.isWaitressAtNode=False
         self.isBackAtCounter=False
     
-    def draw(self, app):
+    def draw(self):
         drawImage('images/gothicWaitress.PNG',self.x, self.y,width=125,height=145, align='center')
     
     def waitressPath(self, start, target):
@@ -39,7 +39,6 @@ class Layout:
             other.isAtTable=True
     
     def isWaitressAtNode(self, other, target):
-        print('target:', target)
         x,y=coordToNode(other.x, other.y)
         print('what am i even checking', (y,x))
         if y == target[1] and x==target[0]:
@@ -188,13 +187,23 @@ class Orders:
 orderList=Orders()
 
 class finalOrders:
-    def __init__(self, base, t1, t2, link):
+    def __init__(self, base, link):
+        self.base=base
         self.link=link
+        self.x, self.y=None, None
+
+finalCrepeCake=finalOrders(crepeCake, 'images/finalCrepeCake.PNG')
+finalSunday=finalOrders(sunday, 'images/finalSunday.PNG')
+finalCakeRoll=finalOrders(cakeRoll, 'images/finalCakeRoll.PNG')
+finalMilkTea=finalOrders(milkTea, 'images/finalMilkTea.PNG')
+
+finalSet={finalCrepeCake, finalSunday, finalCakeRoll, finalMilkTea}
 
 ################################################################################
         # DFS
         # Initial write-up assissted + taught by TA Lukas (lkebulad)
         # Later modified to fix some bugs + adjust to needs of my game
+        # makeAdjacencyList() function wrote by self
 ################################################################################
 
 def makeAdjacencyList():
@@ -282,10 +291,15 @@ class Revenue:
 
 income=Revenue()
 
-def calculateRevenue(menu,tip):
-    for order in orderList.delivered:
-        base=order.base
-        income.earning+=base.price
+def calculateRevenue():
+    finishedOrder=orderList.delivered[-1]
+    base=finishedOrder.base
+    income.earning+=base.price
+
+    finishedCustomer=app.customers[0]
+    
+    tip=finishedCustomer.howMuchTip()
+    income.tip+=tip
 
     #revenue system for tipping
     pass
@@ -297,11 +311,13 @@ def onAppStart(app):
     app.width, app.height = 800,500
     app.rows, app.cols=4,12
     app.cellWidth, app.cellHeight = 50,50
+    app.StepsPerSecond=1
 
     app.customers=[]
+    app.customerSkin=['images/blueBunny.PNG', 'images/yellowBunny.PNG', 'images/greenBunny.PNG']
     app.isCooking=False
     app.revenue=0.00
-    app.StepsPerSecond=1
+    
     app.currIndex=0
     app.counter=0
     app.wIndex=0
@@ -312,7 +328,9 @@ def onAppStart(app):
     app.clickedPerson=None
     app.goServe=False
     app.orderDelivered=False
+    
     app.showMenu=False
+    app.showFinal==False
 
 #VIEW
 def drawTable(app):
@@ -331,8 +349,9 @@ def drawOrderList(app):
         drawLabel(f'{customer.orderT1} {customer.orderT2} {customer.orderBase}', 450, 65+i*15, size=10)
 
 ################################################################################
-    #Draw board functions referenced my code from Tetris
+    # Draw board functions referenced my code from Tetris
 ################################################################################
+
 def drawBoard(app):
     for row in range(app.rows):
         for col in range(app.cols):
@@ -352,7 +371,7 @@ def drawCell(app, rows, col):
 def drawDisplay(app):
     drawImage('images/display.PNG', 0,0, width=app.width, height=app.height)
     #display revenue
-    #drawLabel({})
+    #drawLabel(f'{income.tip} + {income.earning} = {income.total}', app.width-200, app.height-90, size=16, align='center)
     #display currOrder
     if len(orderList.orders)>0:
         currOrder=orderList.orders[0]
@@ -377,7 +396,8 @@ def redrawAll(app):
     waitressG.draw(app)
     
     for customer in app.customers:
-        drawImage('images/blueBunny.PNG', customer.x, customer.y, width=50,height=100, align='center')
+        customerSkin=app.customerSkin[random.randint(0,(len(app.customerSkin)-1))]
+        drawImage(customerSkin, customer.x, customer.y, width=50,height=100, align='center')
         drawLabel(customer.time, customer.x, customer.y)
 
     for base in baseSet:
@@ -391,6 +411,15 @@ def redrawAll(app):
 
     if app.showMenu:
         drawImage('images/menu.PNG', 0, 0, width=app.width,height=app.height, opacity=95)
+    
+    drawFinal(app, waitressG)
+
+def drawFinal(app, waitress):
+    if app.showFinal:
+        for final in finalSet:
+            currOrderBase=orderList.finished[-1][0]
+            if final.base==currOrderBase:
+                drawImage(final.link, waitress.x-10, waitress.y, width=45, height=45)
 
 
 #CONTROLLER
@@ -423,21 +452,26 @@ def leaveCustomer(i, app):
                 pathCoord=customer.customerLeave()
                 i%=len(pathCoord)
                 customer.x, customer.y=pathCoord[i][0], pathCoord[i][1]
+            else:
+                app.customers.pop(0)
+
+def moveBackImage(): 
+    orderBase, orderT1, orderT2 =counter.base, counter.topping1, counter.topping2
+    orderBase.x, orderBase.y=orderBase.ogXY
+    orderT1.x, orderT1.y=orderT1.ogXY
+    orderT2.x, orderT2.y=orderT2.ogXY
 
 def whenOrderReady(app):
     if app.orderComplete:
         #ingredients move back to original position (track original position)
-        orderBase, orderT1, orderT2 =counter.base, counter.topping1, counter.topping2
-        #finalRender=finalOrders(orderBase, orderT1, orderT2)
-        orderBase.x, orderBase.y=orderBase.ogXY
-        orderT1.x, orderT1.y=orderT1.ogXY
-        orderT2.x, orderT2.y=orderT2.ogXY
-  
+        moveBackImage()
+
+        #replace all images on counter to image of final product
+        app.showFinal==True
+        
         #all counter attributes are reset back to none
         counter.base, counter.topping1, counter.topping2=None, None, None
 
-        #replace all images on counter to image of final product
-        
         #have waitress hold the final product image
         #wait for player to click on a customer to send the order to
         #if they walk to the wrong person...if they click on a new person(right or wrong)...
@@ -455,9 +489,11 @@ def whenOrderDone(app):
         #app.orderComplete=False
         app.orderDelivered=False
 
-    #when order is DONE, waitress makes her way BACK to the counter
-    #and waits (for the next order to be finished) or picks up the next order
-    #SIMULTANEOUSLY, customer with this order LEAVES
+        #when order is DONE, waitress makes her way BACK to the counter
+        #and waits (for the next order to be finished) or picks up the next order
+        #SIMULTANEOUSLY, customer with this order LEAVES
+        #revenue is CALCULATED
+        #calculateRevenue()
     pass
 
 def countDown(app):
@@ -491,7 +527,6 @@ def onStep(app):
         goBackCounter(app.wIndex, waitressG)
         app.wIndex+=1
         
-
 ################################################################################
         # POINT in POLYGON    
         # general concept + math explained by TA, wrote code myself 
@@ -524,7 +559,6 @@ def clickedIngredient(mouseX, mouseY):
 def isCurrOrderComplete(base, t1, t2, app):
     print('base:', base, 't1:', t1, 't2:', t2)
     currOrder=orderList.orders[0]
-    #check if the order is complete
     if base==currOrder[0] and (t1==currOrder[1] or t1==currOrder[2]) and (t2==currOrder[2] or t2==currOrder[1]):
         app.orderComplete=True
         waitressG.whichOrder=currOrder
@@ -569,6 +603,8 @@ def moveWaitress(i, app, waitress):
         print('not at node yet!')
     else:
         #check if waitress order matches customer order
+        #if not, waitress will stop walking. player has to reclick to trigger new path
+        #player cannot move to next order until current order is delivered
         print('reached node!')
         if waitress.whichOrder==orderList.finisihed[-1]:
             app.orderDelivered=True
@@ -610,6 +646,14 @@ def onMouseDrag(app, mouseX, mouseY):
         if ingredient!=None:
             ingredient.x, ingredient.y=mouseX, mouseY
 
+def wrongIngredientReset(app):
+    if app.currItem==counter.topping1:
+        counter.topping1=None
+    if app.currItem==counter.topping2:
+        counter.topping2=None
+    if app.currItem==counter.base:
+        counter.base=None
+
 def onMouseRelease(app, mouseX, mouseY):
     if app.isCooking:
         if inCounter(mouseX, mouseY):
@@ -623,8 +667,6 @@ def onMouseRelease(app, mouseX, mouseY):
             elif app.currItem in toppingSet and counter.topping2==None:
                 counter.topping2=app.currItem
                 print('t2:', counter.topping2)
-            # elif app.currItem in toppingSet and counter.topping1!=None and counter.topping2!=None:
-            #     counter.topping1=app.currItem
 
             #Checks if the currItem is in the currOrder
             if isInCurrOrder(app.currItem):
@@ -632,12 +674,7 @@ def onMouseRelease(app, mouseX, mouseY):
                 app.currItem.x, app.currItem.y=mouseX, mouseY
             else:
                 print('not part of the order!')
-                if app.currItem==counter.topping1:
-                    counter.topping1=None
-                if app.currItem==counter.topping2:
-                    counter.topping2=None
-                if app.currItem==counter.base:
-                    counter.base=None
+                wrongIngredientReset(app)
                 app.currItem.x, app.currItem.y=app.currItem.ogXY
             isCurrOrderComplete(counter.base, counter.topping1, counter.topping2, app)
         else:
