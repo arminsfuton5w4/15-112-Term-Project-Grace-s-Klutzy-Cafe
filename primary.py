@@ -43,6 +43,7 @@ class Layout:
         x,y=coordToNode(other.x, other.y)
         print('what am i even checking', (y,x))
         if y == target[1] and x==target[0]:
+            print('target is equal to x,y')
             other.isWaitressAtNode=True
     
     def isBackAtCounter(self, other, target):
@@ -79,7 +80,7 @@ class Customer:
         pathCoord=nodeToCoord(path)
         return pathCoord
     
-    def howMuchTip(self, tip, mood):
+    def howMuchTip(self):
         if 6<=self.time<=10:
             return self.giveTip
         elif 2<=self.time<=5:
@@ -96,20 +97,6 @@ class Customer:
 
 # def ateMyOrder(app):
 #     return app.orderDelivered
-
-class Revenue:
-    def __init__(self):
-        self.tip=0
-        self.earning=0
-        self.total=self.tip+self.earning
-
-income=Revenue()
-
-def getRevenue(menu,tip):
-    # for order in :
-    #     pass
-    #revenue system for tipping
-    pass
 
 def nodeToCoord(path):
     pathCoord=[]
@@ -196,6 +183,7 @@ class Orders:
     def __init__(self):
         self.orders=[]
         self.finished=[]
+        self.delivered=[]
 
 orderList=Orders()
 
@@ -285,6 +273,22 @@ def generateOrder():
     print(orderList.orders)
     
     return order
+
+class Revenue:
+    def __init__(self):
+        self.tip=0
+        self.earning=0
+        self.total=self.tip+self.earning
+
+income=Revenue()
+
+def calculateRevenue(menu,tip):
+    for order in orderList.delivered:
+        base=order.base
+        income.earning+=base.price
+
+    #revenue system for tipping
+    pass
 
 ################################################################################
 
@@ -566,8 +570,9 @@ def moveWaitress(i, app, waitress):
     else:
         #check if waitress order matches customer order
         print('reached node!')
-        if waitress.whichOrder==orderList.finisihed[0]:
+        if waitress.whichOrder==orderList.finisihed[-1]:
             app.orderDelivered=True
+            orderList.delivered.append(orderList.finished[-1])
         app.goServe=False
 
 def goBackCounter(i, waitress):
@@ -618,8 +623,8 @@ def onMouseRelease(app, mouseX, mouseY):
             elif app.currItem in toppingSet and counter.topping2==None:
                 counter.topping2=app.currItem
                 print('t2:', counter.topping2)
-            elif app.currItem in toppingSet and counter.topping2!=None:
-                counter.topping1=app.currItem
+            # elif app.currItem in toppingSet and counter.topping1!=None and counter.topping2!=None:
+            #     counter.topping1=app.currItem
 
             #Checks if the currItem is in the currOrder
             if isInCurrOrder(app.currItem):
@@ -627,6 +632,12 @@ def onMouseRelease(app, mouseX, mouseY):
                 app.currItem.x, app.currItem.y=mouseX, mouseY
             else:
                 print('not part of the order!')
+                if app.currItem==counter.topping1:
+                    counter.topping1=None
+                if app.currItem==counter.topping2:
+                    counter.topping2=None
+                if app.currItem==counter.base:
+                    counter.base=None
                 app.currItem.x, app.currItem.y=app.currItem.ogXY
             isCurrOrderComplete(counter.base, counter.topping1, counter.topping2, app)
         else:
