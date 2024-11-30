@@ -478,7 +478,6 @@ def whenOrderReady(app):
         #...the waitress should redirect path to the new person
         #if they walk to the right person, the order is DONE
         pass
-    pass
 
 def whenOrderDone(app):
     if app.orderDelivered:
