@@ -90,7 +90,7 @@ class Customer:
         else:
             return 0
     
-    def timeToLeave(self):
+    def timeToLeave(self, app):
         if self.time==0 or app.orderDelivered:
             return True
         return False
@@ -407,6 +407,7 @@ def redrawAll(app):
     for topping in toppingSet:
         size=topping.r*2
         drawImage(topping.image, topping.x, topping.y, align='center', width=size, height=size)
+    
     drawTable(app)
 
     if app.showMenu:
@@ -448,9 +449,9 @@ def moveCustomer(i, app):
 
 def leaveCustomer(i, app):
     for customer in app.customers:
-        if customer.timeToLeave():
+        if customer.timeToLeave(app):
             if not customer.isAtExit:
-                pathCoord=customer.customerLeave()
+                pathCoord=customer.customerLeave(start, (0,9))
                 i%=len(pathCoord)
                 customer.x, customer.y=pathCoord[i][0], pathCoord[i][1]
             else:
@@ -613,14 +614,14 @@ def moveWaitress(i, app, waitress):
             app.orderDelivered=True
             print('successfully delivered!')
             orderList.delivered.append(orderList.finished[-1])
+            app.showFinal=False
         app.goServe=False
-        app.showFinal=False
 
 def goBackCounter(i, waitress):
-    layout.isBackAtCounter(waitress, (0,0))
     for node in layout.filledSeats:
         if node==app.clickedPerson:
             start=node
+    layout.isBackAtCounter(waitress, (0,0))
     if not waitress.isBackAtCounter:
         print('not at counter yet')
         pathCoord=waitress.waitressPath(start,(0,0))
