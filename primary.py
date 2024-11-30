@@ -66,7 +66,7 @@ class Customer:
         self.isAtTable=False
         self.time=10
         self.giveTip=self.orderBase.price*0.10
-        self.leave=False
+        # self.leave=False
         self.isAtExit=False
     
     def __repr__(self):
@@ -90,13 +90,10 @@ class Customer:
         else:
             return 0
     
-#     def timeToLeave(self):
-#         if self.time==0 or ateMyOrder(app):
-#             return True
-#         return False
-
-# def ateMyOrder(app):
-#     return app.orderDelivered
+    def timeToLeave(self):
+        if self.time==0 or app.orderDelivered:
+            return True
+        return False
 
 def nodeToCoord(path):
     pathCoord=[]
@@ -451,7 +448,7 @@ def moveCustomer(i, app):
 
 def leaveCustomer(i, app):
     for customer in app.customers:
-        if customer.leave:
+        if customer.timeToLeave():
             if not customer.isAtExit:
                 pathCoord=customer.customerLeave()
                 i%=len(pathCoord)
@@ -617,6 +614,7 @@ def moveWaitress(i, app, waitress):
             print('successfully delivered!')
             orderList.delivered.append(orderList.finished[-1])
         app.goServe=False
+        app.showFinal=False
 
 def goBackCounter(i, waitress):
     layout.isBackAtCounter(waitress, (0,0))
