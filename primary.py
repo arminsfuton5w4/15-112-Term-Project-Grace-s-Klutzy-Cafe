@@ -451,10 +451,11 @@ def leaveCustomer(i, app):
     for customer in app.customers:
         if customer.timeToLeave(app):
             if not customer.isAtExit:
-                pathCoord=customer.customerLeave(start, (0,9))
+                pathCoord=customer.customerPath((3,8), (0,9))
                 i%=len(pathCoord)
                 customer.x, customer.y=pathCoord[i][0], pathCoord[i][1]
             else:
+                print('customer has left')
                 app.customers.pop(0)
 
 def moveBackImage(): 
@@ -527,7 +528,7 @@ def onStep(app):
         app.wIndex+=1
     if app.orderDelivered:
         print('time to go back!')
-        goBackCounter(app.wIndex, waitressG)
+        goBackCounter(app.gwIndex, app, waitressG)
         print('index=', app.gwIndex)
         app.gwIndex+=1
         
@@ -615,9 +616,10 @@ def moveWaitress(i, app, waitress):
             print('successfully delivered!')
             orderList.delivered.append(orderList.finished[-1])
             app.showFinal=False
+            app.wIndex=0
         app.goServe=False
 
-def goBackCounter(i, waitress):
+def goBackCounter(i, app, waitress):
     for node in layout.filledSeats:
         if node==app.clickedPerson:
             start=node
@@ -631,6 +633,8 @@ def goBackCounter(i, waitress):
         print('waitress at', (waitress.x, waitress.y))
     else:
         app.isCooking=True
+        app.orderDelivered=False
+        app.gwIndex=0
 
 def onMousePress(app, mouseX, mouseY):
     if app.isCooking:
