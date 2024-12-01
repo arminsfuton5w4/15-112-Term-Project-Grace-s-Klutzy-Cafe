@@ -451,6 +451,7 @@ def moveCustomer(i, app):
 def leaveCustomer(i, app):
     for customer in app.customers:
         if customer.timeToLeave():
+            print('customer leaving!!')
             if not customer.isAtExit:
                 pathCoord=customer.customerPath((3,8), (0,9))
                 i%=len(pathCoord)
@@ -490,15 +491,16 @@ def whenOrderDone(app):
         #and waits (for the next order to be finished) or picks up the next order
         #SIMULTANEOUSLY, customer with this order LEAVES
         for customer in app.customers:
+            print('customer order:', customer.order, 'finished order:', orderList.finished[-1])
             if customer.order==orderList.finished[-1]:
+                print('customer order matches, time to go')
                 customer.leave=True
         #revenue is CALCULATED
         #calculateRevenue()
 
-        #app.orderComplete=False
+        app.orderComplete=False
         app.orderDelivered=False
         app.beginNextOrder=True
-    pass
 
 def countDown(app):
     for customer in app.customers:
