@@ -31,7 +31,7 @@ waitressG=Waitress(200,200)
 class Layout:
     def __init__(self,tables):
         self.tables=tables
-        self.filledSeats=[]
+        self.filledSeats={}
     
     def isAtTable(self, other):
         x,y=coordToNode(other.x, other.y)
@@ -434,7 +434,7 @@ def removeSeat(coordX,coordY, tables):
     x,y=coordToNode(coordX, coordY)
     if (y,x) in tables:
         tables.remove((y,x))
-    layout.filledSeats.append((y, x))
+    layout.filledSeats.add((y, x))
 
 def moveCustomer(i, app):
     for customer in app.customers:
@@ -583,6 +583,7 @@ def isInCurrOrder(currItem):
     #check if item is part of the current order
 
 def clickedPerson(mouseX, mouseY, app):
+    print('filledSeats:', layout.filledSeats)
     for node in layout.filledSeats: #(x,y)
         coordinates=nodeToCoord(node) #(200,300, left/top)
         print('node:', node, coordinates)
