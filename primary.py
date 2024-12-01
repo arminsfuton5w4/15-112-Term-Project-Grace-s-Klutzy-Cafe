@@ -464,6 +464,7 @@ def leaveCustomer(i, app):
                 print('customer has left')
                 app.customers.pop(0)
                 app.filledSeats.remove()
+                #figure out how to remove the right seat tuple
 
 def moveBackImage(): 
     orderBase, orderT1, orderT2 =counter.base, counter.topping1, counter.topping2
