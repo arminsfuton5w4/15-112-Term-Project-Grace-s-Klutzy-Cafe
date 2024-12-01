@@ -302,9 +302,6 @@ def calculateRevenue(app):
     income.total=income.tip+income.earning
     print(income.earning, income.tip, income.total)
 
-    #revenue system for tipping
-    pass
-
 ################################################################################
 
 #MODEL
