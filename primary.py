@@ -31,7 +31,7 @@ waitressG=Waitress(200,200)
 class Layout:
     def __init__(self,tables):
         self.tables=tables
-        self.filledSeats={}
+        self.filledSeats=set()
     
     def isAtTable(self, other):
         x,y=coordToNode(other.x, other.y)
@@ -63,10 +63,11 @@ class Customer:
         self.x, self.y = x,y
         self.skin=skin
         self.orderBase, self.orderT1, self.orderT2=generateOrder()
+        self.order=(self.orderBase, self.orderT1, self.orderT2)
         self.isAtTable=False
         self.time=10
         self.giveTip=self.orderBase.price*0.10
-        # self.leave=False
+        self.leave=False
         self.isAtExit=False
     
     def __repr__(self):
@@ -90,8 +91,8 @@ class Customer:
         else:
             return 0
     
-    def timeToLeave(self, app):
-        if self.time==0 or app.orderDelivered:
+    def timeToLeave(self):
+        if self.time==0 or self.leave:
             return True
         return False
 
@@ -344,9 +345,9 @@ def drawOrderList(app):
     menuWidth, menuHeight=150, 140
     drawRect(app.width-425, app.height-475, menuWidth, menuHeight, fill=lightPink, opacity=80, border='black')
     drawLabel('ORDERS:', 450, 45, bold=True)
-    for i in range(len(app.customers)):
-        customer=app.customers[i]
-        drawLabel(f'{customer.orderT1} {customer.orderT2} {customer.orderBase}', 450, 65+i*15, size=10)
+    for i in range(len(orderList.orders)):
+        order=orderList.orders[i]
+        drawLabel(f'{order[1]} {order[2]} {order[0]}', 450, 65+i*15, size=10)
 
 ################################################################################
     # Draw board functions referenced my code from Tetris
@@ -449,7 +450,7 @@ def moveCustomer(i, app):
 
 def leaveCustomer(i, app):
     for customer in app.customers:
-        if customer.timeToLeave(app):
+        if customer.timeToLeave():
             if not customer.isAtExit:
                 pathCoord=customer.customerPath((3,8), (0,9))
                 i%=len(pathCoord)
@@ -488,6 +489,9 @@ def whenOrderDone(app):
         #when order is DONE, waitress makes her way BACK to the counter
         #and waits (for the next order to be finished) or picks up the next order
         #SIMULTANEOUSLY, customer with this order LEAVES
+        for customer in app.customers:
+            if customer.order==orderList.finished[-1]:
+                customer.leave=True
         #revenue is CALCULATED
         #calculateRevenue()
 
