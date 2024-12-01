@@ -83,16 +83,18 @@ class Customer:
     
     def howMuchTip(self):
         if 6<=self.time<=10:
-            return self.giveTip
+            return pythonRound(rounded(self.giveTip), 2)
         elif 2<=self.time<=5:
-            return self.giveTip-self.giveTip*0.5
+            self.giveTip=self.giveTip-self.giveTip*0.5
+            return pythonRound(rounded(self.giveTip), 2)
         elif 0<=self.time<=1:
-            return self.giveTip-self.giveTip*0.8
+            self.giveTip=self.giveTip-self.giveTip*0.8
+            return pythonRound(rounded(self.giveTip), 2)
         else:
-            return 0
+            return 0.00
     
     def timeToLeave(self):
-        if self.time==0 or self.leave:
+        if self.leave==True or self.time==0:
             return True
         return False
 
@@ -282,21 +284,23 @@ def generateOrder():
 
 class Revenue:
     def __init__(self):
-        self.tip=0
-        self.earning=0
-        self.total=self.tip+self.earning
+        self.tip=0.00
+        self.earning=0.00
+        self.total=0.00
 
 income=Revenue()
 
-def calculateRevenue():
+def calculateRevenue(app):
     finishedOrder=orderList.delivered[-1]
-    base=finishedOrder.base
+    base=finishedOrder[0]
     income.earning+=base.price
 
     finishedCustomer=app.customers[0]
     
     tip=finishedCustomer.howMuchTip()
     income.tip+=tip
+    income.total=income.tip+income.earning
+    print(income.earning, income.tip, income.total)
 
     #revenue system for tipping
     pass
@@ -344,10 +348,10 @@ def drawOrderList(app):
     lightPink=rgb(251,227,227)
     menuWidth, menuHeight=150, 140
     drawRect(app.width-425, app.height-475, menuWidth, menuHeight, fill=lightPink, opacity=80, border='black')
-    drawLabel('ORDERS:', 450, 45, bold=True)
+    drawLabel('Orders:', 450, 45, bold=True, font='grenze', size=14)
     for i in range(len(orderList.orders)):
         order=orderList.orders[i]
-        drawLabel(f'{order[1]} {order[2]} {order[0]}', 450, 65+i*15, size=10)
+        drawLabel(f'{order[1]} {order[2]} {order[0]}', 450, 70+i*15, size=11)
 
 ################################################################################
     # Draw board functions referenced my code from Tetris
@@ -372,14 +376,14 @@ def drawCell(app, rows, col):
 def drawDisplay(app):
     drawImage('images/display.PNG', 0,0, width=app.width, height=app.height)
     #display revenue
-    drawLabel(f'earning  tip   total', app.width-200, app.height-60, size=16, align='center')
-    drawLabel(f'{income.earning} + {income.tip} = {income.total}', app.width-200, app.height-40, size=24, align='center')
+    drawLabel(f'earning      tip         total', app.width-200, app.height-70, size=16, align='center', font='grenze')
+    drawLabel(f'${income.earning} + ${income.tip} = ${income.total}', app.width-200, app.height-40, size=22, align='center')
     #display currOrder
     if len(orderList.orders)>0:
         currOrder=orderList.orders[0]
         base, t1, t2=currOrder[0], currOrder[1], currOrder[2]
         w,h=75,75
-        start, gap=50, 10
+        start, gap=60, 10
         drawImage(base.image, start, app.height-90, width=w, height=h)
         drawImage(t1.image, start+w+gap, app.height-90, width=w-10, height=h-10)
         drawImage(t2.image, start+2*(w+gap), app.height-90, width=w-10, height=h-10)
@@ -435,7 +439,7 @@ def removeSeat(coordX,coordY, tables):
     x,y=coordToNode(coordX, coordY)
     if (y,x) in tables:
         tables.remove((y,x))
-    layout.filledSeats.add((y, x))
+        layout.filledSeats.add((y, x))
 
 def moveCustomer(i, app):
     for customer in app.customers:
@@ -459,6 +463,7 @@ def leaveCustomer(i, app):
             else:
                 print('customer has left')
                 app.customers.pop(0)
+                app.filledSeats.remove()
 
 def moveBackImage(): 
     orderBase, orderT1, orderT2 =counter.base, counter.topping1, counter.topping2
@@ -475,7 +480,7 @@ def whenOrderReady(app):
         app.showFinal=True
         
         #all counter attributes are reset back to none
-        counter.base, counter.topping1, counter.topping2=None, None, None
+        counter.base, counter.topping1, counter. topping2=None, None, None
 
         #wait for player to click on a customer to send the order to
         #if they walk to the wrong person...if they click on a new person(right or wrong)...
@@ -495,11 +500,9 @@ def whenOrderDone(app):
             if customer.order==orderList.finished[-1]:
                 print('customer order matches, time to go')
                 customer.leave=True
-        #revenue is CALCULATED
-        #calculateRevenue()
 
         app.orderComplete=False
-        app.orderDelivered=False
+        # app.orderDelivered=False
         app.beginNextOrder=True
 
 def countDown(app):
@@ -519,12 +522,13 @@ def onStep(app):
         app.isCooking=True
     elif len(app.customers)>1 and app.beginNextOrder:
         app.isCooking=True
-    if app.counter%50==0 and len(orderList.orders)>0:
+         
+    if app.counter%10==0 and len(orderList.orders)>0:
         countDown(app)
     if orderList.orders==[]:
         app.isCooking=False
     #Customer Movement
-    if app.counter%10==0 and len(orderList.orders)>0:
+    if app.counter%2==0 and len(orderList.orders)>0:
         moveCustomer(app.currIndex, app)
         leaveCustomer(app.currIndex, app)
         app.currIndex+=1
@@ -537,6 +541,7 @@ def onStep(app):
         goBackCounter(app.gwIndex, app, waitressG)
         print('index=', app.gwIndex)
         app.gwIndex+=1
+    whenOrderDone(app)
         
 ################################################################################
         # POINT in POLYGON    
@@ -599,7 +604,7 @@ def clickedPerson(mouseX, mouseY, app):
             if d<app.cellWidth:
                 print(node, True)
                 return (node, True)
-        return (None, False)
+    return (None, False)
 
 def moveWaitress(i, app, waitress):
     for node in layout.filledSeats:
@@ -625,6 +630,8 @@ def moveWaitress(i, app, waitress):
             app.showFinal=False
             app.wIndex=0
         app.goServe=False
+        #revenue is CALCULATED
+        calculateRevenue(app)
 
 def goBackCounter(i, app, waitress):
     for node in layout.filledSeats:
@@ -634,7 +641,6 @@ def goBackCounter(i, app, waitress):
     if not waitress.isBackAtCounter:
         print('not at counter yet')
         pathCoord=waitress.waitressPath(start,(0,0))
-        print('the path is', pathCoord)
         i%=len(pathCoord)
         waitress.x, waitress.y=pathCoord[i][0], pathCoord[i][1]
         print('waitress at', (waitress.x, waitress.y))
@@ -651,6 +657,7 @@ def onMousePress(app, mouseX, mouseY):
             app.isDragging=True
     if app.orderComplete:
         checkPerson=clickedPerson(mouseX, mouseY, app)
+        print('checkPerson:', checkPerson)
         if checkPerson!=None:
             if checkPerson[1]:
                 app.goServe=True
