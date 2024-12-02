@@ -79,6 +79,7 @@ class Customer:
         state=(False, target, [])
         path=DFS(board, state, visited, start)
         path=state[-1]
+        print(path)
         pathCoord=nodeToCoord(path)
         return pathCoord
     
@@ -421,7 +422,7 @@ def drawFinal(app, waitress):
         for final in finalSet:
             currOrderBase=orderList.finished[-1][0]
             if final.base==currOrderBase:
-                drawImage(final.link, waitress.x+25, waitress.y-50, width=45, height=45)
+                drawImage(final.link, waitress.x+10, waitress.y-100, width=45, height=45)
 
 #CONTROLLER
 
@@ -453,11 +454,11 @@ def moveCustomer(i, app):
 
 def leaveCustomer(i, app):
     for customer in app.customers:
+        exit=(0,9)
         if customer.timeToLeave():
-            layout.isAtExit(customer)
+            layout.isAtExit(customer, exit)
             if not customer.isAtExit:
                 pathCoord=customer.customerPath(customer.seat, (0,9))
-                print(pathCoord)
                 i%=len(pathCoord)
                 customer.x, customer.y=pathCoord[i][0], pathCoord[i][1]
                 x,y=coordToNode(customer.x, customer.y)
@@ -465,7 +466,7 @@ def leaveCustomer(i, app):
             else:
                 print('customer has left')
                 app.customers.pop(0)
-                app.filledSeats.remove(customer.seat)
+                layout.filledSeats.remove(customer.seat)
 
 def moveBackImage(): 
     orderBase, orderT1, orderT2 =counter.base, counter.topping1, counter.topping2
