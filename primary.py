@@ -97,7 +97,6 @@ class Customer:
         state=(False, target, [])
         path=DFS(board, state, visited, start)
         path=state[-1]
-        print('customer path:',path)
         pathCoord=nodeToCoord(path)
         return pathCoord
     
@@ -114,7 +113,7 @@ class Customer:
             return 0.00
     
     def timeToLeave(self):
-        if self.leave==True or self.time==0:
+        if self.time==0 or self.leave==True:
             return True
         return False
 
@@ -487,8 +486,10 @@ def leaveCustomer(app):
                 print('customer leaving!!', (y, x), 'leaving from:',customer.seat)
             else:
                 print('customer has left')
+                customer.leave=False
                 app.customers.pop(0)
                 layout.filledSeats.remove(customer.seat)
+                layout.tables.append(customer.seat)
 
 def moveBackImage(): 
     orderBase, orderT1, orderT2 =counter.base, counter.topping1, counter.topping2
