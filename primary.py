@@ -500,7 +500,7 @@ def whenOrderReady(app):
         #if they walk to the right person, the order is DONE
 
 def whenOrderDone(app):
-    if app.orderDelivered:
+    if app.orderDelivered and len(app.customers)>0:
         #when order is DONE, waitress makes her way BACK to the counter
         #and waits (for the next order to be finished) or picks up the next order
         #SIMULTANEOUSLY, customer with this order LEAVES
