@@ -314,6 +314,7 @@ def onAppStart(app):
 
     app.customers=[]
     app.customerSkin=['images/blueBunny.PNG', 'images/yellowBunny.PNG', 'images/greenBunny.PNG']
+    app.customerJustServed=[]
     app.isCooking=False
     app.revenue=0.00
     
@@ -443,32 +444,38 @@ def moveCustomer(i, app):
         if not customer.timeToLeave():
             layout.isAtTable(customer)
             if not customer.isAtTable:
+                customer.pathIndex+=1
                 tables=layout.tables
                 pathCoord=customer.customerPath((0,9), tables)
-                i%=len(pathCoord)
-                customer.x, customer.y=pathCoord[i][0], pathCoord[i][1]
+                # i%=len(pathCoord)
+                customer.pathIndex%=len(pathCoord)
+                customer.x, customer.y=pathCoord[customer.pathIndex][0], pathCoord[customer.pathIndex][1]
             else:
                 removeSeat(customer.x, customer.y, layout.tables)
                 seatx,seaty=coordToNode(customer.x, customer.y)
                 customer.seat=(seaty, seatx)
+                customer.pathIndex=0
                 print('customer seated at:', customer.seat)
 
 def leaveCustomer(i, app):
     for customer in app.customers:
         exit=(0,9)
-        customer.pathIndex=app.currIndex ##SOMETHINGGGG
+         ##SOMETHINGGGG
         if customer.timeToLeave():
             layout.isAtExit(customer, exit)
             if not customer.isAtExit:
+                customer.pathIndex+=1
                 pathCoord=customer.customerPath(customer.seat, (0,9))
-                i%=len(pathCoord)
-                customer.x, customer.y=pathCoord[i][0], pathCoord[i][1]
+                # i%=len(pathCoord)
+                customer.pathIndex%=len(pathCoord)
+                customer.x, customer.y=pathCoord[customer.pathIndex][0], pathCoord[customer.pathIndex][1]
                 x,y=coordToNode(customer.x, customer.y)
                 print('customer leaving!!', (y, x), 'leaving from:',customer.seat)
             else:
                 print('customer has left')
                 app.customers.pop(0)
                 layout.filledSeats.remove(customer.seat)
+                customer.pathIndex=0
 
 def moveBackImage(): 
     orderBase, orderT1, orderT2 =counter.base, counter.topping1, counter.topping2
@@ -618,13 +625,15 @@ def moveWaitress(i, app, waitress):
         #player cannot move to next order until current order is delivered
         print('reached node!')
         app.goServe=False
-        if servedRightPerson(waitress.whichOrder, target, app):
+        rightPerson=servedRightPerson(waitress.whichOrder, target, app)
+        if rightPerson[1]:
             app.orderDelivered=True
             print('successfully delivered :)')
             orderList.delivered.append(orderList.finished[-1])
             app.showFinal=False
             app.wIndex=0
             calculateRevenue(app)
+            app.customerJustServed=rightPerson[0]
         else:
             print('unsucessful delivery :(')
             print('waitress delivering', waitress.whichOrder, 'should deliver to', orderList.finished[-1])
@@ -636,13 +645,11 @@ def servedRightPerson(waitressOrder, target, app):
         if customer.seat==target:
             currCustomer=customer
     if waitressOrder==currCustomer.order:
-        return True
+        return (currCustomer, True)
     return False
 
 def goBackCounter(i, app, waitress):
-    for node in layout.filledSeats:
-        if node==app.clickedPerson:
-            start=node
+    start=app.currCustomer.seat
     layout.isBackAtCounter(waitress, (2,0))
     if not waitress.isBackAtCounter:
         pathCoord=waitress.waitressPath(start,(2,0))
