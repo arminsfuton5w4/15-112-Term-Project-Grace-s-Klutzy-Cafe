@@ -64,6 +64,7 @@ class Customer:
         self.skin=skin
         self.orderBase, self.orderT1, self.orderT2=generateOrder()
         self.order=(self.orderBase, self.orderT1, self.orderT2)
+        self.seat=None
         self.isAtTable=False
         self.time=10
         self.giveTip=self.orderBase.price*0.10
@@ -346,7 +347,7 @@ def drawOrderList(app):
     drawLabel('Orders:', 450, 45, font='grenze', bold=True, size=14)
     for i in range(len(app.customers)):
         customer=app.customers[i]
-        drawLabel(f'{customer.orderT1} {customer.orderT12} {customer.orderBase}', 450, 70+i*15, size=11)
+        drawLabel(f'{customer.orderT1} {customer.orderT2} {customer.orderBase}', 450, 70+i*15, size=11)
 
 ####        FONT ISN'T WORKING          ####
 
@@ -389,9 +390,7 @@ def drawDisplay(app):
 def redrawAll(app):
    
     drawImage('images/backdrop.PNG', 0,0, width=app.width, height=app.height+10)
-    # drawPolygon(70,250, 120,280, 210,220, 160,190, fill='lavender')
 
-    # drawTable(app)
     drawOrderList(app)
     drawBoard(app)
 
@@ -422,8 +421,7 @@ def drawFinal(app, waitress):
         for final in finalSet:
             currOrderBase=orderList.finished[-1][0]
             if final.base==currOrderBase:
-                drawImage(final.link, waitress.x-5, waitress.y+50, width=45, height=45)
-
+                drawImage(final.link, waitress.x+5, waitress.y, width=45, height=45)
 
 #CONTROLLER
 
@@ -440,31 +438,31 @@ def removeSeat(coordX,coordY, tables):
 
 def moveCustomer(i, app):
     for customer in app.customers:
-        layout.isAtTable(customer)
-        if not customer.isAtTable:
-            tables=layout.tables
-            pathCoord=customer.customerPath((0,9), tables)
-            i%=len(pathCoord)
-            customer.x, customer.y=pathCoord[i][0], pathCoord[i][1]
-        else:
-            removeSeat(customer.x, customer.y, layout.tables)
-
-def leaveCustomer(i, app):
-    for node in layout.filledSeats:
-        if node==app.clickedPerson:
-            start=node
-    for customer in app.customers:
-        if customer.timeToLeave():
-            print('customer leaving!!')
-            if not customer.isAtExit:
-                pathCoord=customer.customerPath(start, (0,9))
+        if not customer.timeToLeave():
+            layout.isAtTable(customer)
+            if not customer.isAtTable:
+                tables=layout.tables
+                pathCoord=customer.customerPath((0,9), tables)
                 i%=len(pathCoord)
                 customer.x, customer.y=pathCoord[i][0], pathCoord[i][1]
             else:
+                removeSeat(customer.x, customer.y, layout.tables)
+                seatx,seaty=coordToNode(customer.x, customer.y)
+                customer.seat=(seaty, seatx)
+                print('customer seated at:', customer.seat)
+
+def leaveCustomer(i, app):
+    for customer in app.customers:
+        if customer.timeToLeave():
+            if not customer.isAtExit:
+                pathCoord=customer.customerPath(customer.seat, (0,9))
+                i%=len(pathCoord)
+                customer.x, customer.y=pathCoord[i][0], pathCoord[i][1]
+                print('customer leaving!!', (customer.y, customer.x), 'leaving from:',customer.seat)
+            else:
                 print('customer has left')
                 app.customers.pop(0)
-                app.filledSeats.remove(start)
-                #figure out how to remove the right seat tuple
+                app.filledSeats.remove(customer.seat)
 
 def moveBackImage(): 
     orderBase, orderT1, orderT2 =counter.base, counter.topping1, counter.topping2
@@ -494,17 +492,13 @@ def whenOrderDone(app):
         #and waits (for the next order to be finished) or picks up the next order
         #SIMULTANEOUSLY, customer with this order LEAVES
         currCustomer=app.customers[0]
-        print('customer order:', currCustomer.order, 'finished order:', orderList.finished[-1])
-        if currCustomer.order==orderList.finished[-1]:
-            print('customer order matches, time to go')
-            currCustomer.leave=True
+        currCustomer.leave=True
         app.orderComplete=False
 
 def countDown(app):
     for customer in app.customers:
         if customer.time<=0 and orderList.orders!=[]:
             orderList.orders.pop(0)
-            app.customers.pop(0)
         else:
             customer.time-=0.5
 
@@ -513,9 +507,10 @@ def onStep(app):
     if app.counter%100==0 and len(app.customers)<3:
         print(app.customers)
         generateCustomer(app)
-    if len(orderList.orders)==1:
+    
+    if len(app.customers)>1 and app.beginNextOrder:
         app.isCooking=True
-    elif len(app.customers)>1 and app.beginNextOrder:
+    elif len(app.customers)==1:
         app.isCooking=True
     
     if orderList.orders==[]:
@@ -524,7 +519,7 @@ def onStep(app):
         countDown(app)
     
     #Customer Movement
-    if app.counter%2==0 and len(orderList.orders)>0:
+    if app.counter%2==0 and len(app.customers)>0:
         moveCustomer(app.currIndex, app)
         leaveCustomer(app.currIndex, app)
         app.currIndex+=1
@@ -533,7 +528,6 @@ def onStep(app):
         moveWaitress(app.wIndex, app, waitressG)
         app.wIndex+=1
     if app.orderDelivered:
-        print('time to go back!')
         goBackCounter(app.gwIndex, app, waitressG)
         app.gwIndex+=1
     whenOrderDone(app)
@@ -590,8 +584,8 @@ def isInCurrOrder(currItem):
 
 def clickedPerson(mouseX, mouseY, app):
     print('filledSeats:', layout.filledSeats)
-    for node in layout.filledSeats: #(x,y)
-        coordinates=nodeToCoord(node) #(200,300, left/top)
+    for node in layout.filledSeats:
+        coordinates=nodeToCoord(node)
         print('node:', node, coordinates)
         if coordinates!=None:
             coordX, coordY=(coordinates[0]+app.cellWidth/2), (coordinates[1]+app.cellHeight/2) #xchange to center
@@ -605,43 +599,55 @@ def moveWaitress(i, app, waitress):
     for node in layout.filledSeats:
         if node==app.clickedPerson:
             target=node
+    print('waitress is serving...', target)
     layout.isWaitressAtNode(waitress, target)
     if not waitress.isWaitressAtNode:
-        pathCoord=waitress.waitressPath((0,2), target)
+        pathCoord=waitress.waitressPath((2,0), target)
         i%=len(pathCoord)
         waitress.x, waitress.y=pathCoord[i][0], pathCoord[i][1]
         wx,wy=coordToNode(waitress.x, waitress.y)
-        print('at node:', (wy,wx))
-        print('not at node yet!')
+        print('at node:', (wy,wx), 'not there yet')
     else:
         #check if waitress order matches customer order
         #if not, waitress will stop walking. player has to reclick to trigger new path
         #player cannot move to next order until current order is delivered
         print('reached node!')
         app.goServe=False
-        if waitress.whichOrder==orderList.finished[-1]:
+        if servedRightPerson(waitress.whichOrder, target, app):
             app.orderDelivered=True
-            print('successfully delivered!')
+            print('successfully delivered :)')
             orderList.delivered.append(orderList.finished[-1])
             app.showFinal=False
             app.wIndex=0
             calculateRevenue(app)
-        print('unsucessful delivery!')
+        else:
+            print('unsucessful delivery :(')
+            print('waitress delivering', waitress.whichOrder, 'should deliver to', orderList.finished[-1])
+            waitress.isWaitressAtNode=False
+
+def servedRightPerson(waitressOrder, target, app):
+    currCustomer=None
+    for customer in app.customers:
+        if customer.seat==target:
+            currCustomer=customer
+    if waitressOrder==currCustomer.order:
+        return True
+    return False
 
 def goBackCounter(i, app, waitress):
     for node in layout.filledSeats:
         if node==app.clickedPerson:
             start=node
-    layout.isBackAtCounter(waitress, (0,2))
+    layout.isBackAtCounter(waitress, (2,0))
     if not waitress.isBackAtCounter:
-        print('not at counter yet')
-        pathCoord=waitress.waitressPath(start,(0,2))
+        pathCoord=waitress.waitressPath(start,(2,0))
         i%=len(pathCoord)
         waitress.x, waitress.y=pathCoord[i][0], pathCoord[i][1]
     else:
         app.beginNextOrder=True
         app.orderDelivered=False
         app.gwIndex=0
+        waitress.isBackAtCounter=False
 
 def onMousePress(app, mouseX, mouseY):
     if app.isCooking:
@@ -656,6 +662,7 @@ def onMousePress(app, mouseX, mouseY):
             if checkPerson[1]:
                 app.goServe=True
                 app.clickedPerson=checkPerson[0]
+                print('app.clickedPerson:', app.clickedPerson)
     if insideMenuButton(mouseX, mouseY, app):
         app.showMenu=True
 
