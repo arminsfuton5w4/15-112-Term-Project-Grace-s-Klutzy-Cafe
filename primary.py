@@ -70,6 +70,7 @@ class Customer:
         self.giveTip=self.orderBase.price*0.10
         self.leave=False
         self.isAtExit=False
+        self.pathIndex=0
     
     def __repr__(self):
         return f'{self.orderT1} {self.orderT2} {self.orderBase}'
@@ -455,6 +456,7 @@ def moveCustomer(i, app):
 def leaveCustomer(i, app):
     for customer in app.customers:
         exit=(0,9)
+        customer.pathIndex=app.currIndex ##SOMETHINGGGG
         if customer.timeToLeave():
             layout.isAtExit(customer, exit)
             if not customer.isAtExit:
