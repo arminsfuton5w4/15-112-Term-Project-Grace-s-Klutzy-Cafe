@@ -649,7 +649,7 @@ def servedRightPerson(waitressOrder, target, app):
     return False
 
 def goBackCounter(i, app, waitress):
-    start=app.currCustomer.seat
+    start=app.customerJustLeft.seat
     layout.isBackAtCounter(waitress, (2,0))
     if not waitress.isBackAtCounter:
         pathCoord=waitress.waitressPath(start,(2,0))
