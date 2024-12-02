@@ -623,7 +623,7 @@ def moveWaitress(i, app, waitress):
         else:
             print('unsucessful delivery :(')
             print('waitress delivering', waitress.whichOrder, 'should deliver to', orderList.finished[-1])
-            waitress.isWaitressAtNode=False
+        waitress.isWaitressAtNode=False
 
 def servedRightPerson(waitressOrder, target, app):
     currCustomer=None
