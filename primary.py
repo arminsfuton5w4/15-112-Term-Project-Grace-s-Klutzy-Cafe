@@ -46,12 +46,12 @@ class Layout:
     
     def isBackAtCounter(self, other, target):
         x,y=coordToNode(other.x, other.y)
-        print('waitress at node:', (y,x))
         if (y, x) == target:
             other.isBackAtCounter=True
     
     def isAtExit(self, other, target):
         x,y=coordToNode(other.x, other.y)
+        print('exit at', target)
         if (y, x) == target:
             other.isAtExit=True
 
@@ -332,8 +332,8 @@ def onAppStart(app):
     app.showFinal=False
 
 #VIEW
-def drawTable(app):
-    tableW, tableH, color=125,100,'red'         
+def drawTable():
+    tableW, tableH =125,100         
     for i in range(3):
         if i%2==1:
             drawImage('images/table.PNG', 450, 250, width=tableW, height=tableH, align='center')
@@ -409,7 +409,7 @@ def redrawAll(app):
         size=topping.r*2
         drawImage(topping.image, topping.x, topping.y, align='center', width=size, height=size)
     
-    drawTable(app)
+    drawTable()
 
     if app.showMenu:
         drawImage('images/menu.PNG', 0, 0, width=app.width,height=app.height, opacity=95)
@@ -421,7 +421,7 @@ def drawFinal(app, waitress):
         for final in finalSet:
             currOrderBase=orderList.finished[-1][0]
             if final.base==currOrderBase:
-                drawImage(final.link, waitress.x+5, waitress.y, width=45, height=45)
+                drawImage(final.link, waitress.x+25, waitress.y-50, width=45, height=45)
 
 #CONTROLLER
 
@@ -454,11 +454,14 @@ def moveCustomer(i, app):
 def leaveCustomer(i, app):
     for customer in app.customers:
         if customer.timeToLeave():
+            layout.isAtExit(customer)
             if not customer.isAtExit:
                 pathCoord=customer.customerPath(customer.seat, (0,9))
+                print(pathCoord)
                 i%=len(pathCoord)
                 customer.x, customer.y=pathCoord[i][0], pathCoord[i][1]
-                print('customer leaving!!', (customer.y, customer.x), 'leaving from:',customer.seat)
+                x,y=coordToNode(customer.x, customer.y)
+                print('customer leaving!!', (y, x), 'leaving from:',customer.seat)
             else:
                 print('customer has left')
                 app.customers.pop(0)
@@ -580,7 +583,6 @@ def isInCurrOrder(currItem):
     if currItem in currOrder:
         return True
     return False
-    #check if item is part of the current order
 
 def clickedPerson(mouseX, mouseY, app):
     print('filledSeats:', layout.filledSeats)
