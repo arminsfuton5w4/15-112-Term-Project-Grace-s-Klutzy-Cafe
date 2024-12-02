@@ -6,7 +6,7 @@ import os, pathlib
 # from layout import * 
 
 ################################################################################
-        # CLASSES
+        # Fixing speed of the program, credit to Professor Kosbie
 ################################################################################
 
 imagePathToCmuImageMap = dict()
@@ -20,6 +20,10 @@ def fixImage(imagePath):
         cmuImage = CMUImage(pilImage)
         imagePathToCmuImageMap[imagePath] = cmuImage
         return cmuImage
+
+################################################################################
+        # CLASSES
+################################################################################
 
 class Waitress:
     def __init__(self, x, y):
@@ -65,7 +69,6 @@ class Layout:
     
     def isAtExit(self, other, target):
         x,y=coordToNode(other.x, other.y)
-        print('exit at', target)
         if (y, x) == target:
             other.isAtExit=True
 
@@ -94,7 +97,7 @@ class Customer:
         state=(False, target, [])
         path=DFS(board, state, visited, start)
         path=state[-1]
-        print(path)
+        print('customer path:',path)
         pathCoord=nodeToCoord(path)
         return pathCoord
     
@@ -476,17 +479,16 @@ def leaveCustomer(app):
         if customer.timeToLeave():
             layout.isAtExit(customer, exit)
             if not customer.isAtExit:
-                customer.pathIndex+=1
                 pathCoord=customer.customerPath(customer.seat, (0,9))
                 customer.pathIndex%=len(pathCoord)
                 customer.x, customer.y=pathCoord[customer.pathIndex][0], pathCoord[customer.pathIndex][1]
                 x,y=coordToNode(customer.x, customer.y)
+                customer.pathIndex+=1
                 print('customer leaving!!', (y, x), 'leaving from:',customer.seat)
             else:
                 print('customer has left')
                 app.customers.pop(0)
                 layout.filledSeats.remove(customer.seat)
-                customer.pathIndex=0
 
 def moveBackImage(): 
     orderBase, orderT1, orderT2 =counter.base, counter.topping1, counter.topping2
@@ -539,14 +541,13 @@ def onStep(app):
     
     if orderList.orders==[]:
         app.isCooking=False
-    if app.counter%10==0 and len(orderList.orders)>0:
+    if app.counter%50==0 and len(orderList.orders)>0:
         countDown(app)
     
     #Customer Movement
     if app.counter%2==0 and len(app.customers)>0:
         moveCustomer(app)
         leaveCustomer(app)
-        # app.currIndex+=1
     #Waitress Movement
     if app.goServe:
         moveWaitress(app.wIndex, app, waitressG)
@@ -657,7 +658,7 @@ def servedRightPerson(waitressOrder, target, app):
             currCustomer=customer
     if waitressOrder==currCustomer.order:
         return (currCustomer, True)
-    return False
+    return (currCustomer, False)
 
 def goBackCounter(i, app, waitress):
     start=app.customerJustServed.seat
