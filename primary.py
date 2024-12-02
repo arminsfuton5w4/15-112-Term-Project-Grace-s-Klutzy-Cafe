@@ -439,7 +439,7 @@ def removeSeat(coordX,coordY, tables):
         tables.remove((y,x))
         layout.filledSeats.add((y, x))
 
-def moveCustomer(i, app):
+def moveCustomer(app):
     for customer in app.customers:
         if not customer.timeToLeave():
             layout.isAtTable(customer)
@@ -447,7 +447,6 @@ def moveCustomer(i, app):
                 customer.pathIndex+=1
                 tables=layout.tables
                 pathCoord=customer.customerPath((0,9), tables)
-                # i%=len(pathCoord)
                 customer.pathIndex%=len(pathCoord)
                 customer.x, customer.y=pathCoord[customer.pathIndex][0], pathCoord[customer.pathIndex][1]
             else:
@@ -457,16 +456,14 @@ def moveCustomer(i, app):
                 customer.pathIndex=0
                 print('customer seated at:', customer.seat)
 
-def leaveCustomer(i, app):
+def leaveCustomer(app):
     for customer in app.customers:
         exit=(0,9)
-         ##SOMETHINGGGG
         if customer.timeToLeave():
             layout.isAtExit(customer, exit)
             if not customer.isAtExit:
                 customer.pathIndex+=1
                 pathCoord=customer.customerPath(customer.seat, (0,9))
-                # i%=len(pathCoord)
                 customer.pathIndex%=len(pathCoord)
                 customer.x, customer.y=pathCoord[customer.pathIndex][0], pathCoord[customer.pathIndex][1]
                 x,y=coordToNode(customer.x, customer.y)
@@ -533,9 +530,9 @@ def onStep(app):
     
     #Customer Movement
     if app.counter%2==0 and len(app.customers)>0:
-        moveCustomer(app.currIndex, app)
-        leaveCustomer(app.currIndex, app)
-        app.currIndex+=1
+        moveCustomer(app)
+        leaveCustomer(app)
+        # app.currIndex+=1
     #Waitress Movement
     if app.goServe:
         moveWaitress(app.wIndex, app, waitressG)
