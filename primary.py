@@ -1,11 +1,25 @@
 from cmu_graphics import *
 import random
 from PIL import Image
+from urllib.request import urlopen
+import os, pathlib
 # from layout import * 
 
 ################################################################################
         # CLASSES
 ################################################################################
+
+imagePathToCmuImageMap = dict()
+
+def fixImage(imagePath):
+    if imagePath in imagePathToCmuImageMap:
+        return imagePathToCmuImageMap[imagePath]
+    else:
+        absPath = '/Users/gh/Documents/GitHub/oneTwelveTP/' + imagePath
+        pilImage=Image.open(absPath)
+        cmuImage = CMUImage(pilImage)
+        imagePathToCmuImageMap[imagePath] = cmuImage
+        return cmuImage
 
 class Waitress:
     def __init__(self, x, y):
@@ -16,7 +30,7 @@ class Waitress:
         self.isBackAtCounter=False
     
     def draw(self):
-        drawImage('images/gothicWaitress.PNG',self.x, self.y,width=125,height=145, align='bottom-left')
+        drawImage(fixImage('images/gothicWaitress.PNG'),self.x, self.y,width=125,height=145, align='bottom-left')
     
     def waitressPath(self, start, target):
         visited=set()
@@ -131,7 +145,7 @@ counter=Counter()
 class Base:
     def __init__(self, name, link, x,y, price, ogXY):
         self.name=name
-        self.image=CMUImage(Image.open(link))
+        self.image=link
         self.x, self.y=x,y
         self.r=25
         self.price=price
@@ -146,7 +160,7 @@ class Base:
 class Toppings:
     def __init__(self, name, link, x,y, ogXY):
         self.name=name
-        self.image=CMUImage(Image.open(link))
+        self.image=link
         self.x, self.y=x,y
         self.r=25
         self.ogXY=ogXY
@@ -339,9 +353,9 @@ def drawTable():
     tableW, tableH =125,100         
     for i in range(3):
         if i%2==1:
-            drawImage('images/table.PNG', 450, 250, width=tableW, height=tableH, align='center')
+            drawImage(fixImage('images/table.PNG'), 450, 250, width=tableW, height=tableH, align='center')
         else:
-            drawImage('images/table.PNG',350+i*100,350,width=tableW, height=tableH, align='center')
+            drawImage(fixImage('images/table.PNG'),350+i*100,350,width=tableW, height=tableH, align='center')
     
 def drawOrderList(app):
     lightPink=rgb(251,227,227)
@@ -375,7 +389,7 @@ def drawCell(app, rows, col):
              fill=None, border='black', borderWidth=0.15)   
 
 def drawDisplay(app):
-    drawImage('images/display.PNG', 0,0, width=app.width, height=app.height)
+    drawImage(fixImage('images/display.PNG'), 0,0, width=app.width, height=app.height)
     #display revenue
     drawLabel(f'earning      tip         total', app.width-200, app.height-70, size=16, align='center', font='grenze')
     drawLabel(f'${income.earning} + ${income.tip} = ${income.total}', app.width-200, app.height-40, size=22, align='center')
@@ -385,14 +399,14 @@ def drawDisplay(app):
         base, t1, t2=currOrder[0], currOrder[1], currOrder[2]
         w,h=75,75
         start, gap=60, 10
-        drawImage(base.image, start, app.height-90, width=w, height=h)
-        drawImage(t1.image, start+w+gap, app.height-90, width=w-10, height=h-10)
-        drawImage(t2.image, start+2*(w+gap), app.height-90, width=w-10, height=h-10)
+        drawImage(fixImage(base.image), start, app.height-90, width=w, height=h)
+        drawImage(fixImage(t1.image), start+w+gap, app.height-90, width=w-10, height=h-10)
+        drawImage(fixImage(t2.image), start+2*(w+gap), app.height-90, width=w-10, height=h-10)
 
 
 def redrawAll(app):
    
-    drawImage('images/backdrop.PNG', 0,0, width=app.width, height=app.height+10)
+    drawImage(fixImage('images/backdrop.PNG'), 0,0, width=app.width, height=app.height+10)
 
     drawOrderList(app)
     drawBoard(app)
@@ -401,21 +415,21 @@ def redrawAll(app):
     waitressG.draw()
     
     for customer in app.customers:
-        drawImage(customer.skin, customer.x, customer.y, width=50,height=100, align='center')
+        drawImage(fixImage(customer.skin), customer.x, customer.y, width=50,height=100, align='center')
         drawLabel(customer.time, customer.x, customer.y)
 
     for base in baseSet:
         size=base.r*2
-        drawImage(base.image, base.x, base.y, align='center', width=size, height=size)
+        drawImage(fixImage(base.image), base.x, base.y, align='center', width=size, height=size)
     
     for topping in toppingSet:
         size=topping.r*2
-        drawImage(topping.image, topping.x, topping.y, align='center', width=size, height=size)
+        drawImage(fixImage(topping.image), topping.x, topping.y, align='center', width=size, height=size)
     
     drawTable()
 
     if app.showMenu:
-        drawImage('images/menu.PNG', 0, 0, width=app.width,height=app.height, opacity=95)
+        drawImage(fixImage('images/menu.PNG'), 0, 0, width=app.width,height=app.height, opacity=95)
     
     drawFinal(app, waitressG)
 
@@ -424,7 +438,7 @@ def drawFinal(app, waitress):
         for final in finalSet:
             currOrderBase=orderList.finished[-1][0]
             if final.base==currOrderBase:
-                drawImage(final.link, waitress.x+10, waitress.y-100, width=45, height=45)
+                drawImage(fixImage(final.link), waitress.x+10, waitress.y-100, width=45, height=45)
 
 #CONTROLLER
 
