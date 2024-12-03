@@ -561,7 +561,6 @@ def countDown(app):
 def onStep(app):
     app.counter+=1
     if app.counter%100==0 and len(app.customers)<3:
-        print(app.customers)
         generateCustomer(app)
     
     if len(app.customers)>1 and app.beginNextOrder:
@@ -619,8 +618,7 @@ def clickedIngredient(mouseX, mouseY):
 
 def isCurrOrderComplete(base, t1, t2, app):
     print('base:', base, 't1:', t1, 't2:', t2)
-    currCustomer=app.customers[0]
-    currOrder=currCustomer.order
+    currOrder=orderList.orders[0]
     if base==currOrder[0] and (t1==currOrder[1] or t1==currOrder[2]) and (t2==currOrder[2] or t2==currOrder[1]):
         app.orderComplete=True
         waitressG.whichOrder=currOrder
