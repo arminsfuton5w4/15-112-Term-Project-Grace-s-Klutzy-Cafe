@@ -72,7 +72,7 @@ class Layout:
         if (y, x) == target:
             other.isAtExit=True
 
-layout2=Layout([(0,4),(0,5),(1,4),(1,5), (2,1),(2,2),(3,1),(3,2), (2,7),(2,8),(3,7),(3,8)])
+# layout2=Layout([(0,4),(0,5),(1,4),(1,5), (2,1),(2,2),(3,1),(3,2), (2,7),(2,8),(3,7),(3,8)])
 layout=Layout([(1,4),(3,2),(3,8)])
 
 class Customer:
@@ -332,6 +332,7 @@ def onAppStart(app):
     app.customerSkin=['images/blueBunny.PNG', 'images/yellowBunny.PNG', 'images/greenBunny.PNG']
     app.customerJustServed=[]
     app.isCooking=False
+    app.cuttingMode=False
     app.revenue=0.00
     
     app.currIndex=0
@@ -341,6 +342,7 @@ def onAppStart(app):
 
     app.isDragging=False
     app.currItem=None
+    app.deliverySucess=0
     app.orderComplete=False
     app.clickedPerson=None
     app.goServe=False
@@ -358,15 +360,21 @@ def drawTable():
             drawImage(fixImage('images/table.PNG'), 450, 250, width=tableW, height=tableH, align='center')
         else:
             drawImage(fixImage('images/table.PNG'),350+i*100,350,width=tableW, height=tableH, align='center')
-    
+
+lightPink=rgb(251,227,227)
+
 def drawOrderList(app):
-    lightPink=rgb(251,227,227)
-    menuWidth, menuHeight=150, 140
-    drawRect(app.width-425, app.height-475, menuWidth, menuHeight, fill=lightPink, opacity=80, border='black')
+    menuWidth, menuHeight=200, 140
+    drawRect(app.width-450, app.height-475, menuWidth, menuHeight, fill=lightPink, opacity=80, border='black')
     drawLabel('Orders:', 450, 45, font='grenze', bold=True, size=14)
     for i in range(len(app.customers)):
         customer=app.customers[i]
-        drawLabel(f'{customer.orderT1} {customer.orderT2} {customer.orderBase}', 450, 70+i*15, size=11)
+        finalImage=None
+        for finals in finalSet:
+            if finals.base==customer.orderBase:
+                finalImage=finals.link
+        drawImage(fixImage(finalImage), 360, 55+i*25, width=30, height=30)
+        drawLabel(f'{customer.orderT1} {customer.orderT2} {customer.orderBase}', 395, 70+i*25, size=11, align='left')
 
 ####        FONT ISN'T WORKING          ####
 
@@ -405,12 +413,10 @@ def drawDisplay(app):
         drawImage(fixImage(base.image), start, app.height-90, width=w, height=h)
         drawImage(fixImage(t1.image), start+w+gap, app.height-90, width=w-10, height=h-10)
         drawImage(fixImage(t2.image), start+2*(w+gap), app.height-90, width=w-10, height=h-10)
-        for i in range(2):
-            drawLabel('+', start+(w+gap)*2*i, app.height-50, size=24)
-
+        for i in range(1,3):
+            drawLabel('+', start+(2*i*w+gap), app.height-50, size=24)
 
 def redrawAll(app):
-   
     drawImage(fixImage('images/backdrop.PNG'), 0,0, width=app.width, height=app.height+10)
 
     drawOrderList(app)
@@ -437,6 +443,19 @@ def redrawAll(app):
         drawImage(fixImage('images/menu.PNG'), 0, 0, width=app.width,height=app.height, opacity=95)
     
     drawFinal(app, waitressG)
+    drawSucess(app, waitressG)
+
+def drawSucess(app, waitress):
+    if app.deliverySucess==0:
+        pass
+    elif app.deliverySucess:
+        drawRect(waitress.x+30, waitress.y-150, 70, 20, fill=lightPink)
+        drawLabel('SUCCESS!!', waitress.x+30, waitress.y-150, align='left')
+    elif app.deliverySucess==2:
+        drawRect(waitress.x+30, waitress.y-150, 100, 20, fill=lightPink)
+        drawLabel('WRONG PERSON', waitress.x+30, waitress.y-150, align='left')
+
+
 
 def drawFinal(app, waitress):
     if app.showFinal:
@@ -465,6 +484,7 @@ def moveCustomer(app):
             if not customer.isAtTable:
                 customer.pathIndex+=1
                 tables=layout.tables
+                print('tables:', tables)
                 pathCoord=customer.customerPath((0,9), tables)
                 customer.pathIndex%=len(pathCoord)
                 customer.x, customer.y=pathCoord[customer.pathIndex][0], pathCoord[customer.pathIndex][1]
@@ -490,8 +510,8 @@ def leaveCustomer(app):
             else:
                 print('customer has left')
                 customer.leave=False
-                app.customers.pop(0)
                 layout.filledSeats.remove(customer.seat)
+                app.customers.pop(0)
                 layout.tables.append(customer.seat)
 
 def moveBackImage(): 
@@ -527,8 +547,8 @@ def whenOrderDone(app):
 
 def countDown(app):
     for customer in app.customers:
-        if customer.time<=0 and orderList.orders!=[]:
-            orderList.orders.pop(0)
+        if customer.time<=0 and (customer.order in orderList.orders):
+            orderList.orders.remove(customer.order)
         else:
             customer.time-=0.5
 
@@ -549,7 +569,7 @@ def onStep(app):
         countDown(app)
     
     #Customer Movement
-    if app.counter%2==0 and len(app.customers)>0:
+    if app.counter%5==0 and len(app.customers)>0:
         moveCustomer(app)
         leaveCustomer(app)
     #Waitress Movement
@@ -592,13 +612,14 @@ def clickedIngredient(mouseX, mouseY):
 
 def isCurrOrderComplete(base, t1, t2, app):
     print('base:', base, 't1:', t1, 't2:', t2)
-    currOrder=orderList.orders[0]
+    currCustomer=app.customers[0]
+    currOrder=currCustomer.order
     if base==currOrder[0] and (t1==currOrder[1] or t1==currOrder[2]) and (t2==currOrder[2] or t2==currOrder[1]):
         app.orderComplete=True
         waitressG.whichOrder=currOrder
         orderList.finished.append(currOrder)
-        orderList.orders.pop(0)
         app.isCooking=False
+        orderList.orders.pop(0)
         print('order is complete!')
         whenOrderReady(app)
         return True
@@ -643,6 +664,7 @@ def moveWaitress(i, app, waitress):
         app.goServe=False
         rightPerson=servedRightPerson(waitress.whichOrder, target, app)
         if rightPerson[1]:
+            app.deliverySucess=1
             app.orderDelivered=True
             print('successfully delivered :)')
             orderList.delivered.append(orderList.finished[-1])
@@ -651,6 +673,7 @@ def moveWaitress(i, app, waitress):
             calculateRevenue(app)
             app.customerJustServed=rightPerson[0]
         else:
+            app.deliverySucess=2
             print('unsucessful delivery :(')
             print('waitress delivering', waitress.whichOrder, 'should deliver to', orderList.finished[-1])
         waitress.isWaitressAtNode=False
@@ -672,6 +695,7 @@ def goBackCounter(i, app, waitress):
         i%=len(pathCoord)
         waitress.x, waitress.y=pathCoord[i][0], pathCoord[i][1]
     else:
+        app.deliverySucess=0
         app.beginNextOrder=True
         app.orderDelivered=False
         app.gwIndex=0
