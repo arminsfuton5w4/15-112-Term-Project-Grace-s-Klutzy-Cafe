@@ -392,6 +392,7 @@ def drawCell(app, rows, col):
 
 def drawDisplay(app):
     drawImage(fixImage('images/display.PNG'), 0,0, width=app.width, height=app.height)
+    drawLabel('instructions:', 81, 415, size=16)
     #display revenue
     drawLabel(f'earning      tip         total', app.width-200, app.height-70, size=16, align='center', font='grenze')
     drawLabel(f'${income.earning} + ${income.tip} = ${income.total}', app.width-200, app.height-40, size=22, align='center')
