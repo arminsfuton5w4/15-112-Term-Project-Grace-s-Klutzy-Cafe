@@ -84,6 +84,7 @@ class Customer:
         self.seat=None
         self.isAtTable=False
         self.time=10
+        self.down=True
         self.giveTip=self.orderBase.price*0.10
         self.leave=False
         self.isAtExit=False
@@ -114,6 +115,7 @@ class Customer:
     
     def timeToLeave(self):
         if self.time==0 or self.leave==True:
+            self.down=False
             return True
         return False
 
@@ -337,7 +339,6 @@ def onAppStart(app):
     app.revenue=0.00
     
     app.currIndex=0
-    app.down=True
 
     app.wIndex=0
     app.gwIndex=0
@@ -460,8 +461,8 @@ def drawSucess(app, waitress):
 
 def drawPopUp(app):
     img=None
-    if app.down:
-        for customer in app.customers:
+    for customer in app.customers:
+        if customer.down:
             for final in finalSet:
                 if final.base==customer.orderBase:
                     img=final.link
@@ -554,7 +555,7 @@ def countDown(app):
     for customer in app.customers:
         if customer.time<=0 and (customer.order in orderList.orders):
             orderList.orders.remove(customer.order)
-        elif customer.time>0 and app.down:
+        elif customer.time>0 and customer.down:
             customer.time-=0.5
 
 def onStep(app):
@@ -565,6 +566,7 @@ def onStep(app):
     
     if len(app.customers)>1 and app.beginNextOrder:
         app.isCooking=True
+        app.beginNextOrder=False
     elif len(app.customers)==1:
         app.isCooking=True
     
@@ -680,7 +682,6 @@ def resetRightPerson(app):
     app.wIndex=0
     calculateRevenue(app)
     app.count=False
-
 
 def servedRightPerson(waitressOrder, target, app):
     currCustomer=None
