@@ -480,6 +480,7 @@ def removeSeat(coordX,coordY, tables):
 def moveCustomer(app):
     for customer in app.customers:
         if not customer.timeToLeave():
+            print('not leaving yet', customer.timeToLeave)
             layout.isAtTable(customer)
             if not customer.isAtTable:
                 customer.pathIndex+=1
@@ -499,6 +500,7 @@ def leaveCustomer(app):
     for customer in app.customers:
         exit=(0,9)
         if customer.timeToLeave():
+            print('should leave', customer.timeToLeave)
             layout.isAtExit(customer, exit)
             if not customer.isAtExit:
                 pathCoord=customer.customerPath(customer.seat, (0,9))
@@ -508,7 +510,7 @@ def leaveCustomer(app):
                 customer.pathIndex+=1
                 print('customer leaving!!', (y, x), 'leaving from:',customer.seat)
             else:
-                print('customer has left')
+                print('customer has left from', customer.seat)
                 customer.leave=False
                 layout.filledSeats.remove(customer.seat)
                 app.customers.pop(0)
@@ -524,7 +526,7 @@ def whenOrderReady(app):
     if app.orderComplete:
         #ingredients move back to original position (track original position)
         moveBackImage()
-
+        
         #replace all images on counter to image of final product
         app.showFinal=True
         
@@ -549,7 +551,7 @@ def countDown(app):
     for customer in app.customers:
         if customer.time<=0 and (customer.order in orderList.orders):
             orderList.orders.remove(customer.order)
-        else:
+        elif customer.time>0:
             customer.time-=0.5
 
 def onStep(app):
@@ -666,7 +668,6 @@ def moveWaitress(i, app, waitress):
         if rightPerson[1]:
             app.deliverySucess=1
             app.orderDelivered=True
-            print('successfully delivered :)')
             orderList.delivered.append(orderList.finished[-1])
             app.showFinal=False
             app.wIndex=0
@@ -674,8 +675,6 @@ def moveWaitress(i, app, waitress):
             app.customerJustServed=rightPerson[0]
         else:
             app.deliverySucess=2
-            print('unsucessful delivery :(')
-            print('waitress delivering', waitress.whichOrder, 'should deliver to', orderList.finished[-1])
         waitress.isWaitressAtNode=False
 
 def servedRightPerson(waitressOrder, target, app):
