@@ -405,6 +405,8 @@ def drawDisplay(app):
         drawImage(fixImage(base.image), start, app.height-90, width=w, height=h)
         drawImage(fixImage(t1.image), start+w+gap, app.height-90, width=w-10, height=h-10)
         drawImage(fixImage(t2.image), start+2*(w+gap), app.height-90, width=w-10, height=h-10)
+        for i in range(2):
+            drawLabel('+', start+(w+gap)*2*i, app.height-50, size=24)
 
 
 def redrawAll(app):
