@@ -140,7 +140,7 @@ class Counter:
         self.base=None
         self.topping1=None
         self.topping2=None
-        self.coordinates=[(70,250), (120,280), (210,220), (160,190)]
+        self.coordinates=[(60,250), (100,280), (210,220), (160,190)]
 
 counter=Counter()
 
@@ -327,6 +327,7 @@ def onAppStart(app):
     app.rows, app.cols=4,12
     app.cellWidth, app.cellHeight = 50,50
     app.StepsPerSecond=1
+    app.counter=0
 
     app.customers=[]
     app.customerSkin=['images/blueBunny.PNG', 'images/yellowBunny.PNG', 'images/greenBunny.PNG']
@@ -336,7 +337,8 @@ def onAppStart(app):
     app.revenue=0.00
     
     app.currIndex=0
-    app.counter=0
+    app.down=True
+
     app.wIndex=0
     app.gwIndex=0
 
@@ -437,25 +439,34 @@ def redrawAll(app):
         size=topping.r*2
         drawImage(fixImage(topping.image), topping.x, topping.y, align='center', width=size, height=size)
     
+    drawFinal(app, waitressG)
+    drawSucess(app, waitressG)
+    drawPopUp(app)
+    
     drawTable()
 
     if app.showMenu:
         drawImage(fixImage('images/menu.PNG'), 0, 0, width=app.width,height=app.height, opacity=95)
-    
-    drawFinal(app, waitressG)
-    drawSucess(app, waitressG)
 
 def drawSucess(app, waitress):
     if app.deliverySucess==0:
         pass
-    elif app.deliverySucess:
-        drawRect(waitress.x+30, waitress.y-150, 70, 20, fill=lightPink)
+    elif app.deliverySucess==1:
+        drawRect(waitress.x+30, waitress.y-160, 70, 15, fill=lightPink)
         drawLabel('SUCCESS!!', waitress.x+30, waitress.y-150, align='left')
     elif app.deliverySucess==2:
-        drawRect(waitress.x+30, waitress.y-150, 100, 20, fill=lightPink)
+        drawRect(waitress.x+30, waitress.y-160, 100, 15, fill=lightPink)
         drawLabel('WRONG PERSON', waitress.x+30, waitress.y-150, align='left')
 
-
+def drawPopUp(app):
+    img=None
+    if app.down:
+        for customer in app.customers:
+            for final in finalSet:
+                if final.base==customer.orderBase:
+                    img=final.link
+            if customer.time%3==0:    
+                drawImage(fixImage(img), customer.x, customer.y-50, width=30, height=30)
 
 def drawFinal(app, waitress):
     if app.showFinal:
@@ -533,16 +544,8 @@ def whenOrderReady(app):
         #all counter attributes are reset back to none
         counter.base, counter.topping1, counter. topping2=None, None, None
 
-        #wait for player to click on a customer to send the order to
-        #if they walk to the wrong person...if they click on a new person(right or wrong)...
-        #...the waitress should redirect path to the new person
-        #if they walk to the right person, the order is DONE
-
 def whenOrderDone(app):
     if app.orderDelivered and len(app.customers)>0:
-        #when order is DONE, waitress makes her way BACK to the counter
-        #and waits (for the next order to be finished) or picks up the next order
-        #SIMULTANEOUSLY, customer with this order LEAVES
         currCustomer=app.customers[0]
         currCustomer.leave=True
         app.orderComplete=False
@@ -551,7 +554,7 @@ def countDown(app):
     for customer in app.customers:
         if customer.time<=0 and (customer.order in orderList.orders):
             orderList.orders.remove(customer.order)
-        elif customer.time>0:
+        elif customer.time>0 and app.down:
             customer.time-=0.5
 
 def onStep(app):
@@ -659,23 +662,25 @@ def moveWaitress(i, app, waitress):
         wx,wy=coordToNode(waitress.x, waitress.y)
         print('at node:', (wy,wx), 'not there yet')
     else:
-        #check if waitress order matches customer order
-        #if not, waitress will stop walking. player has to reclick to trigger new path
-        #player cannot move to next order until current order is delivered
         print('reached node!')
         app.goServe=False
         rightPerson=servedRightPerson(waitress.whichOrder, target, app)
         if rightPerson[1]:
-            app.deliverySucess=1
-            app.orderDelivered=True
-            orderList.delivered.append(orderList.finished[-1])
-            app.showFinal=False
-            app.wIndex=0
-            calculateRevenue(app)
+            resetRightPerson(app)
             app.customerJustServed=rightPerson[0]
         else:
             app.deliverySucess=2
         waitress.isWaitressAtNode=False
+
+def resetRightPerson(app):
+    app.deliverySucess=1
+    app.orderDelivered=True
+    orderList.delivered.append(orderList.finished[-1])
+    app.showFinal=False
+    app.wIndex=0
+    calculateRevenue(app)
+    app.count=False
+
 
 def servedRightPerson(waitressOrder, target, app):
     currCustomer=None
