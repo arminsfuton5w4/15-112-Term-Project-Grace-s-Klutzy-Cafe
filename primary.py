@@ -566,7 +566,7 @@ def countDown(app):
         elif customer.time>0 and customer.down:
             customer.time-=0.5
 
-def onStep(app):
+def game_onStep(app):
     app.counter+=1
     if app.counter%100==0 and len(app.customers)<3:
         generateCustomer(app)
@@ -707,7 +707,7 @@ def goBackCounter(i, app, waitress):
         app.gwIndex=0
         waitress.isBackAtCounter=False
 
-def onMousePress(app, mouseX, mouseY):
+def game_onMousePress(app, mouseX, mouseY):
     if app.isCooking:
         check=clickedIngredient(mouseX, mouseY)
         if check[1]:
@@ -728,7 +728,7 @@ def insideMenuButton(mouseX, mouseY, app):
     if (buttonLeft<=mouseX<=right) and (buttonTop<=mouseY<=bottom):
         return True
 
-def onMouseDrag(app, mouseX, mouseY):
+def game_onMouseDrag(app, mouseX, mouseY):
     if app.isCooking:
         ingredient=app.currItem
         if ingredient!=None:
@@ -742,7 +742,7 @@ def wrongIngredientReset(app):
     if app.currItem==counter.base:
         counter.base=None
 
-def onMouseRelease(app, mouseX, mouseY):
+def game_onMouseRelease(app, mouseX, mouseY):
     if app.isCooking:
         if inCounter(mouseX, mouseY):
             #Checks for property of currItem - base/topping - & updates counter
