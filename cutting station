@@ -1,0 +1,30 @@
+################################################################################
+    # cutting station
+################################################################################
+
+# if order is "completed" on the counter:
+# instead of showing the final product, pops into the cutting station
+# pauses the rest of the game until the cutting is finished
+# maximum cut 2 times
+# maximum rotate 2 times
+
+class cutLines:
+    pass
+
+class Knife:
+    pass
+cKnife=Knife()
+
+class Mortar:
+    pass
+cMortar=Mortar()
+
+def cutting_redrawAll (app):
+    drawImage(fixImage('images/cuttingStation.PNG'), 0,0, app.width, app.height)
+
+
+def cutting_onMousePress(app, mouseX, mouseY):
+    pass
+
+def cutting_onMouseDrag(app, mouseX, mouseY):
+    pass
