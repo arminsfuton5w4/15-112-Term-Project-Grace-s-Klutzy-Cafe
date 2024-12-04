@@ -4,7 +4,7 @@ from PIL import Image
 from urllib.request import urlopen
 import os, pathlib
 from startScreen import * 
-from cuttingStation import *
+# from cuttingStation import *
 
 ################################################################################
         # Fixing speed of the program, credit to Professor Kosbie
@@ -158,9 +158,10 @@ class Counter:
 counter=Counter()
 
 class Base:
-    def __init__(self, name, link, x,y, price, ogXY):
+    def __init__(self, name, link, x,y, price, ogXY, final):
         self.name=name
         self.image=link
+        self.final=final
         self.x, self.y=x,y
         self.r=25
         self.price=price
@@ -176,6 +177,7 @@ class Toppings:
     def __init__(self, name, link, x,y, ogXY, property):
         self.name=name
         self.image=link
+        # self.prepped=prep
         self.x, self.y=x,y
         self.r=25
         self.ogXY=ogXY
@@ -191,10 +193,14 @@ class Toppings:
 def distance(x0,y0,x1,y1):
     return (((x1-x0)**2+(y1-y0)**2)**0.5)
 
-cakeRoll=Base('cake-roll', 'images/cakeRoll.PNG',50, 120, 7.50, (50, 120))
-crepeCake=Base('crepe-cake','images/crepeCake.PNG',92,100,8.00,(92,105))
-sunday=Base('sunday', 'images/sunday.PNG', 50, 190, 6.75, (50, 190))
-milkTea=Base('milk-tea', 'images/boba2.PNG', 92, 165, 5.50, (92, 165))
+cakeRoll=Base('cake-roll', 'images/cakeRoll.PNG',50, 120, 7.50, (50, 120), 
+              'images/finalCrepeCake.PNG')
+crepeCake=Base('crepe-cake','images/crepeCake.PNG',92,100,8.00,(92,105),
+               'images/finalSunday.PNG')
+sunday=Base('sunday', 'images/sunday.PNG', 50, 190, 6.75, (50, 190),
+            'images/finalCakeRoll.PNG')
+milkTea=Base('milk-tea', 'images/boba2.PNG', 92, 165, 5.50, (92, 165),
+             'images/finalMilkTea.PNG')
 
 baseSet={cakeRoll, crepeCake, sunday, milkTea}
 
@@ -224,12 +230,12 @@ class finalOrders:
         self.link=link
         self.x, self.y=None, None
 
-finalCrepeCake=finalOrders(crepeCake, 'images/finalCrepeCake.PNG')
-finalSunday=finalOrders(sunday, 'images/finalSunday.PNG')
-finalCakeRoll=finalOrders(cakeRoll, 'images/finalCakeRoll.PNG')
-finalMilkTea=finalOrders(milkTea, 'images/finalMilkTea.PNG')
+# finalCrepeCake=finalOrders(crepeCake, 'images/finalCrepeCake.PNG')
+# finalSunday=finalOrders(sunday, 'images/finalSunday.PNG')
+# finalCakeRoll=finalOrders(cakeRoll, 'images/finalCakeRoll.PNG')
+# finalMilkTea=finalOrders(milkTea, 'images/finalMilkTea.PNG')
 
-finalSet={finalCrepeCake, finalSunday, finalCakeRoll, finalMilkTea}
+# finalSet={finalCrepeCake, finalSunday, finalCakeRoll, finalMilkTea}
 
 ################################################################################
         # DFS
@@ -386,9 +392,9 @@ def drawOrderList(app):
     for i in range(len(app.customers)):
         customer=app.customers[i]
         finalImage=None
-        for finals in finalSet:
-            if finals.base==customer.orderBase:
-                finalImage=finals.link
+        for base in baseSet:
+            if base==customer.orderBase:
+                finalImage=base.final
         drawImage(fixImage(finalImage), 360, 55+i*25, width=30, height=30)
         drawLabel(f'{customer.orderT1} {customer.orderT2} {customer.orderBase}',
                   395, 70+i*25, size=11, align='left')
@@ -485,19 +491,19 @@ def drawPopUp(app):
     img=None
     for customer in app.customers:
         if customer.down:
-            for final in finalSet:
-                if final.base==customer.orderBase:
-                    img=final.link
+            for base in baseSet:
+                if base==customer.orderBase:
+                    img=base.final
             if customer.time%3==0:    
                 drawImage(fixImage(img), customer.x, customer.y-50, width=30,
                           height=30)
 
 def drawFinal(app, waitress):
     if app.showFinal:
-        for final in finalSet:
+        for base in baseSet:
             currOrderBase=orderList.finished[-1][0]
-            if final.base==currOrderBase:
-                drawImage(fixImage(final.link), waitress.x+10, waitress.y-100,
+            if base==currOrderBase:
+                drawImage(fixImage(base.final), waitress.x+10, waitress.y-100,
                           width=45, height=45)
 
 #CONTROLLER

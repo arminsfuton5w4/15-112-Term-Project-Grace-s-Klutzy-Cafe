@@ -25,9 +25,6 @@ from cmu_graphics import *
 
 #new app variables:
 def onScreenActivate(app):
-    app.stepsPerSecond=3
-
-    app.currOrder=orderList.orders[0]
 
     app.grindingMode, app.cuttingMode=False, False
 
@@ -43,10 +40,18 @@ def onScreenActivate(app):
     for topping in prepList:
         topping.finishedPrep=False
 
-topping1, topping2=app.currOrder[1], app.currOrder[2]
+def getCurrOrder():
+    if orderList.orders!=[]:
+        currOrder=orderList.orders[0]
+    return currOrder
+currOrder=getCurrOrder()
+topping1, topping2=currOrder[1], currOrder[2]
 prepList=(topping1, topping2)
+currTopping=prepList[0]
 
 def cutting_onStep(app):
+    doPrep(app)
+    
     if checkPrepProgress():
         app.orderComplete=True
         waitressG.whichOrder=app.currOrder
@@ -57,6 +62,7 @@ def cutting_onStep(app):
         whenOrderReady(app)
         
         setActiveScreen('game')
+    
     if app.grindingMode and app.mousePress:
         app.startGrinding+=1
 
@@ -76,7 +82,7 @@ class Tool:
 cBoardCoordinates=(375, 150)
 cBoardWidth=375
 cBoardHeight=240
-# center (563, 270)
+cBoardCenter=(563, 270)
 
 knife=Tool('knife','images/knife.PNG',320, 210, (320, 210), )
 mortar=Tool('mortar', 'images/mortar.PNG',320, 210, (320, 210))
@@ -84,6 +90,7 @@ mortar=Tool('mortar', 'images/mortar.PNG',320, 210, (320, 210))
 def cutting_redrawAll (app):
     drawImage(fixImage('images/cuttingStation.PNG'), 0,0, app.width, app.height)
 
+    drawImage(fixImage(currTopping.image),cBoardCenter, width=150, height=150)
     knife.draw()
     mortar.draw()
 
@@ -129,8 +136,11 @@ def cutting_onMouseDrag(app, mouseX, mouseY):
         knife.x, knife.y=mouseX, mouseY
     if app.holdMortar:
         mortar.x, mortar.y=mouseX, mouseY
-    if inBounds(mouseX, mouseY, cuttingBoardCoordinate):
-        app.lineEndLocation=(mouseX, mouseY)
+    if inBounds(mouseX, mouseY, cBoardX, ):
+        if app.grindingMode:
+            app.circleTrail.append((mouseX, mouseY))
+        if app.cuttingMode:
+            app.lineEndLocation=(mouseX, mouseY)
 
 def cutting_onMouseRelease(app, mouseX, mouseY):
     if not app.holdKnife and inBounds(mouseX, mouseX, knife.bounds, knife.w, knife.h):
@@ -149,15 +159,14 @@ def cutting_onMouseMove(app, mouseX, mouseY):
         mortar.x, mortar.y=mouseX, mouseY
 
 def doPrep(app):
-    for topping in prepList:
-        if topping.finishedPrep==False:
-            if topping.property=='grind':
-                app.holdMortar==True
-            elif topping.property=='cut':
-                pass
+    if not currTopping.finishedPrep:
+        if currTopping.property=='grind':
+            app.grindingMode=True
+        elif currTopping.property=='cut':
+            app.cuttingMode=True
 
 def checkPrepProgress():
     for topping in prepList:
-        if topping.state==False:
+        if not topping.state:
             return False
     return True
