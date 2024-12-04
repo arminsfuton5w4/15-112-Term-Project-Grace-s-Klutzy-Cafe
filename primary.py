@@ -72,7 +72,6 @@ class Layout:
         if (y, x) == target:
             other.isAtExit=True
 
-# layout2=Layout([(0,4),(0,5),(1,4),(1,5), (2,1),(2,2),(3,1),(3,2), (2,7),(2,8),(3,7),(3,8)])
 layout=Layout([(1,4),(3,2),(3,8)])
 
 class Customer:
@@ -169,7 +168,7 @@ class Toppings:
         self.r=25
         self.ogXY=ogXY
         self.property=property
-        self.state=False
+        self.finishedPrep=False
     
     def __repr__(self):
         return f'{self.name}'  
@@ -630,16 +629,7 @@ def isCurrOrderComplete(base, t1, t2, app):
     currOrder=orderList.orders[0]
     if (base==currOrder[0] and (t1==currOrder[1] or t1==currOrder[2])
         and (t2==currOrder[2] or t2==currOrder[1])):
-        
         setActiveScreen('cutting')
-
-        app.orderComplete=True
-        waitressG.whichOrder=currOrder
-        orderList.finished.append(currOrder)
-        app.isCooking=False
-        orderList.orders.pop(0)
-        print('order is complete!')
-        whenOrderReady(app)
         return True
 
 def isInCurrOrder(currItem):
