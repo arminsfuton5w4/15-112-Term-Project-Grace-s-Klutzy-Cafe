@@ -3,7 +3,7 @@ import random
 from PIL import Image
 from urllib.request import urlopen
 import os, pathlib
-# from layout import * 
+from startScreen import * 
 
 ################################################################################
         # Fixing speed of the program, credit to Professor Kosbie
@@ -630,6 +630,9 @@ def isCurrOrderComplete(base, t1, t2, app):
     if (base==currOrder[0] and (t1==currOrder[1] or t1==currOrder[2])
         and (t2==currOrder[2] or t2==currOrder[1])):
         app.orderComplete=True
+
+        setActiveScreen('cutting')
+
         waitressG.whichOrder=currOrder
         orderList.finished.append(currOrder)
         app.isCooking=False
@@ -770,7 +773,7 @@ def game_onMouseRelease(app, mouseX, mouseY):
         app.showMenu=False
 
 def main():
-    runApp()
+    runAppWithScreens(initialScreen='start')
 
 main()
 cmu_graphics.run()
