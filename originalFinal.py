@@ -34,8 +34,7 @@ class Waitress:
         self.isBackAtCounter=False
     
     def draw(self):
-        drawImage(fixImage(self.image),self.x, self.y,width=125,height=145,
-                  align='bottom-left')
+        drawImage(fixImage(self.image),self.x, self.y,width=125,height=145, align='bottom-left')
     
     def waitressPath(self, start, target):
         visited=set()
@@ -162,13 +161,12 @@ class Base:
         return hash(str(self)) 
 
 class Toppings:
-    def __init__(self, name, link, x,y, ogXY, property):
+    def __init__(self, name, link, x,y, ogXY):
         self.name=name
         self.image=link
         self.x, self.y=x,y
         self.r=25
         self.ogXY=ogXY
-        self.property=property
     
     def __repr__(self):
         return f'{self.name}'  
@@ -179,10 +177,10 @@ class Toppings:
 def distance(x0,y0,x1,y1):
     return (((x1-x0)**2+(y1-y0)**2)**0.5)
 
-cakeRoll=Base('cake-roll', 'images/cakeRoll.PNG',50, 120, 7.50, (50, 120),'cut')
-crepeCake=Base('crepe-cake','images/crepeCake.PNG',92,100,8.00,(92,105),'grind')
-sunday=Base('sunday', 'images/sunday.PNG', 50, 190, 6.75, (50, 190), 'cut')
-milkTea=Base('milk-tea', 'images/boba2.PNG', 92, 165, 5.50, (92, 165),'grind')
+cakeRoll=Base('cake-roll', 'images/cakeRoll.PNG',50, 120, 7.50, (50, 120))
+crepeCake=Base('crepe-cake', 'images/crepeCake.PNG',92, 100, 8.00, (92,105))
+sunday=Base('sunday', 'images/sunday.PNG', 50, 190, 6.75, (50, 190))
+milkTea=Base('milk-tea', 'images/boba2.PNG', 92, 165, 5.50, (92, 165))
 
 baseSet={cakeRoll, crepeCake, sunday, milkTea}
 
@@ -195,8 +193,7 @@ mango=Toppings('mango', 'images/mango.PNG',252, 90, (252,90))
 
 toppingSet={strawberry, mango, chocolate, ube, redBean, matcha}
 
-ingredientList=[cakeRoll, crepeCake, sunday, milkTea, strawberry,
-                mango, chocolate, ube, redBean, matcha]
+ingredientList=[cakeRoll, crepeCake, sunday, milkTea, strawberry, mango, chocolate, ube, redBean, matcha]
 
 class Orders:
     def __init__(self):
@@ -250,8 +247,7 @@ def makeAdjacencyList():
                 adjList[(row,col)]={(row-1, col), (row+1, col), (row, col-1)}
             #everything else: 4 edges
             else:
-                adjList[(row, col)]={(row-1, col), (row+1, col), (row, col-1),
-                                     (row, col+1)}
+                adjList[(row, col)]={(row-1, col), (row+1, col), (row, col-1), (row, col+1)}
     return adjList
 
 board=makeAdjacencyList()
@@ -333,8 +329,7 @@ def onAppStart(app):
     app.counter=0
 
     app.customers=[]
-    app.customerSkin=['images/blueBunny.PNG', 'images/yellowBunny.PNG',
-                      'images/greenBunny.PNG']
+    app.customerSkin=['images/blueBunny.PNG', 'images/yellowBunny.PNG', 'images/greenBunny.PNG']
     app.customerJustServed=[]
     app.isCooking=False
     app.revenue=0.00
@@ -358,18 +353,15 @@ def drawTable():
     tableW, tableH =125,100         
     for i in range(3):
         if i%2==1:
-            drawImage(fixImage('images/table.PNG'), 450, 250, width=tableW,
-                      height=tableH, align='center')
+            drawImage(fixImage('images/table.PNG'), 450, 250, width=tableW, height=tableH, align='center')
         else:
-            drawImage(fixImage('images/table.PNG'),350+i*100,350,width=tableW,
-                      height=tableH, align='center')
+            drawImage(fixImage('images/table.PNG'),350+i*100,350,width=tableW, height=tableH, align='center')
 
 lightPink=rgb(251,227,227)
 
 def drawOrderList(app):
     menuWidth, menuHeight=200, 140
-    drawRect(app.width-450, app.height-475, menuWidth, menuHeight, 
-             fill=lightPink, opacity=80, border='black')
+    drawRect(app.width-450, app.height-475, menuWidth, menuHeight, fill=lightPink, opacity=80, border='black')
     drawLabel('Orders:', 450, 45, font='grenze', bold=True, size=14)
     for i in range(len(app.customers)):
         customer=app.customers[i]
@@ -378,8 +370,7 @@ def drawOrderList(app):
             if finals.base==customer.orderBase:
                 finalImage=finals.link
         drawImage(fixImage(finalImage), 360, 55+i*25, width=30, height=30)
-        drawLabel(f'{customer.orderT1} {customer.orderT2} {customer.orderBase}',
-                  395, 70+i*25, size=11, align='left')
+        drawLabel(f'{customer.orderT1} {customer.orderT2} {customer.orderBase}', 395, 70+i*25, size=11, align='left')
 
 ################################################################################
     # Draw board functions referenced my code from Tetris
@@ -402,14 +393,11 @@ def drawCell(app, rows, col):
              fill=None, border='black', borderWidth=0.15)   
 
 def drawDisplay(app):
-    drawImage(fixImage('images/display.PNG'),0,0, width=app.width, 
-              height=app.height)
+    drawImage(fixImage('images/display.PNG'), 0,0, width=app.width, height=app.height)
     drawLabel('instructions:', 81, 415, size=16)
     #display revenue
-    drawLabel(f'earning      tip         total', app.width-200, app.height-70,
-              size=16, align='center', font='grenze')
-    drawLabel(f'${income.earning} + ${income.tip} = ${income.total}',
-              app.width-200, app.height-40, size=22, align='center')
+    drawLabel(f'earning      tip         total', app.width-200, app.height-70, size=16, align='center', font='grenze')
+    drawLabel(f'${income.earning} + ${income.tip} = ${income.total}', app.width-200, app.height-40, size=22, align='center')
     #display currOrder
     if len(orderList.orders)>0:
         currOrder=orderList.orders[0]
@@ -417,16 +405,13 @@ def drawDisplay(app):
         w,h=75,75
         start, gap=60, 10
         drawImage(fixImage(base.image), start, app.height-90, width=w, height=h)
-        drawImage(fixImage(t1.image), start+w+gap, app.height-90, width=w-10,
-                  height=h-10)
-        drawImage(fixImage(t2.image), start+2*(w+gap), app.height-90,
-                  width=w-10, height=h-10)
+        drawImage(fixImage(t1.image), start+w+gap, app.height-90, width=w-10, height=h-10)
+        drawImage(fixImage(t2.image), start+2*(w+gap), app.height-90, width=w-10, height=h-10)
         for i in range(1,3):
             drawLabel('+', start+(2*i*w+gap), app.height-50, size=24)
 
 def redrawAll(app):
-    drawImage(fixImage('images/backdrop.PNG'), 0,0, width=app.width,
-              height=app.height+10)
+    drawImage(fixImage('images/backdrop.PNG'), 0,0, width=app.width, height=app.height+10)
 
     drawOrderList(app)
     drawBoard(app)
@@ -435,19 +420,16 @@ def redrawAll(app):
     waitressG.draw()
     
     for customer in app.customers:
-        drawImage(fixImage(customer.skin), customer.x, customer.y, width=50,
-                  height=100, align='center')
+        drawImage(fixImage(customer.skin), customer.x, customer.y, width=50,height=100, align='center')
         drawLabel(customer.time, customer.x, customer.y)
 
     for base in baseSet:
         size=base.r*2
-        drawImage(fixImage(base.image), base.x, base.y, align='center',
-                  width=size, height=size)
+        drawImage(fixImage(base.image), base.x, base.y, align='center', width=size, height=size)
     
     for topping in toppingSet:
         size=topping.r*2
-        drawImage(fixImage(topping.image), topping.x, topping.y, align='center',
-                  width=size, height=size)
+        drawImage(fixImage(topping.image), topping.x, topping.y, align='center', width=size, height=size)
     
     drawFinal(app, waitressG)
     drawSucess(app, waitressG)
@@ -456,8 +438,7 @@ def redrawAll(app):
     drawTable()
 
     if app.showMenu:
-        drawImage(fixImage('images/menu.PNG'), 0, 0, width=app.width,
-                  height=app.height, opacity=95)
+        drawImage(fixImage('images/menu.PNG'), 0, 0, width=app.width,height=app.height, opacity=95)
 
 def drawSucess(app, waitress):
     if app.deliverySucess==0:
@@ -477,16 +458,14 @@ def drawPopUp(app):
                 if final.base==customer.orderBase:
                     img=final.link
             if customer.time%3==0:    
-                drawImage(fixImage(img), customer.x, customer.y-50, width=30,
-                          height=30)
+                drawImage(fixImage(img), customer.x, customer.y-50, width=30, height=30)
 
 def drawFinal(app, waitress):
     if app.showFinal:
         for final in finalSet:
             currOrderBase=orderList.finished[-1][0]
             if final.base==currOrderBase:
-                drawImage(fixImage(final.link), waitress.x+10, waitress.y-100,
-                          width=45, height=45)
+                drawImage(fixImage(final.link), waitress.x+10, waitress.y-100, width=45, height=45)
 
 #CONTROLLER
 
@@ -510,8 +489,7 @@ def moveCustomer(app):
                 tables=layout.tables
                 pathCoord=customer.customerPath((0,9), tables)
                 customer.pathIndex%=len(pathCoord)
-                customer.x=pathCoord[customer.pathIndex][0]
-                customer.y=pathCoord[customer.pathIndex][1]
+                customer.x, customer.y=pathCoord[customer.pathIndex][0], pathCoord[customer.pathIndex][1]
             else:
                 removeSeat(customer.x, customer.y, layout.tables)
                 seatx,seaty=coordToNode(customer.x, customer.y)
@@ -526,8 +504,7 @@ def leaveCustomer(app):
             if not customer.isAtExit:
                 pathCoord=customer.customerPath(customer.seat, (0,9))
                 customer.pathIndex%=len(pathCoord)
-                customer.x=pathCoord[customer.pathIndex][0]
-                customer.y=pathCoord[customer.pathIndex][1]
+                customer.x, customer.y=pathCoord[customer.pathIndex][0], pathCoord[customer.pathIndex][1]
                 x,y=coordToNode(customer.x, customer.y)
                 customer.pathIndex+=1
             else:
@@ -627,8 +604,7 @@ def clickedIngredient(mouseX, mouseY):
 def isCurrOrderComplete(base, t1, t2, app):
     print('base:', base, 't1:', t1, 't2:', t2)
     currOrder=orderList.orders[0]
-    if (base==currOrder[0] and (t1==currOrder[1] or t1==currOrder[2])
-        and (t2==currOrder[2] or t2==currOrder[1])):
+    if base==currOrder[0] and (t1==currOrder[1] or t1==currOrder[2]) and (t2==currOrder[2] or t2==currOrder[1]):
         app.orderComplete=True
         waitressG.whichOrder=currOrder
         orderList.finished.append(currOrder)
@@ -649,8 +625,7 @@ def clickedPerson(mouseX, mouseY, app):
     for node in layout.filledSeats:
         coordinates=nodeToCoord(node)
         if coordinates!=None:
-            coordX=(coordinates[0]+app.cellWidth/2)
-            coordY=(coordinates[1]+app.cellHeight/2)
+            coordX, coordY=(coordinates[0]+app.cellWidth/2), (coordinates[1]+app.cellHeight/2) #xchange to center
             d=distance(mouseX, mouseY, coordX, coordY)
             if d<app.cellWidth:
                 return (node, True)
@@ -665,6 +640,7 @@ def moveWaitress(i, app, waitress):
         pathCoord=waitress.waitressPath((2,0), target)
         i%=len(pathCoord)
         waitress.x, waitress.y=pathCoord[i][0], pathCoord[i][1]
+        wx,wy=coordToNode(waitress.x, waitress.y)
     else:
         app.goServe=False
         rightPerson=servedRightPerson(waitress.whichOrder, target, app)
@@ -745,7 +721,7 @@ def wrongIngredientReset(app):
 def onMouseRelease(app, mouseX, mouseY):
     if app.isCooking:
         if inCounter(mouseX, mouseY):
-            #Checks for property of currItem - base/topping - & updates counter
+            #Checks for property of currItem - base or topping - & updates counter
             if app.currItem in baseSet:
                 counter.base=app.currItem
                 print('base:', counter.base)
@@ -762,7 +738,7 @@ def onMouseRelease(app, mouseX, mouseY):
             else:
                 wrongIngredientReset(app)
                 app.currItem.x, app.currItem.y=app.currItem.ogXY
-            isCurrOrderComplete(counter.base,counter.topping1,counter.topping2,app)
+            isCurrOrderComplete(counter.base, counter.topping1, counter.topping2, app)
         else:
             if app.currItem!=None: 
                 app.currItem.x, app.currItem.y=app.currItem.ogXY
