@@ -56,6 +56,23 @@ def cutting_redrawAll (app):
     knife.draw()
     mortar.draw()
 
+    if ((app.lineStartLocation !=None) and
+        (app.lineEndLocation !=None)):
+            if app.cuttingMode:
+                drawCut(app)
+            elif app.grindingMode:
+                drawGrind(app)
+
+def drawCut(app):
+    x0, y0=app.lineStartLocation
+    x1, y1=app.lineEndLocation
+    drawLine(x0, y0, x1, y1, dashes=app.draggingLine)
+
+def drawGrind(app):
+    
+    drawArc(boardX, boardY, width, height, startAngle, sweepAngle,
+            dashes=app.draggingLine)
+
 def inBounds(mouseX, mouseY, coordinates, width, height):
     left, top=coordinates[0], coordinates[1]
     right=left+width
@@ -65,7 +82,8 @@ def inBounds(mouseX, mouseY, coordinates, width, height):
     return False
 
 def cutting_onMousePress(app, mouseX, mouseY):
-    if 
+    app.lineStartLocation=(mouseX, mouseY)
+    app.lineEndLocation=None
     pass
 
 def cutting_onMouseDrag(app, mouseX, mouseY):
@@ -73,6 +91,8 @@ def cutting_onMouseDrag(app, mouseX, mouseY):
         knife.x, knife.y=mouseX, mouseY
     if app.holdMortar:
         mortar.x, mortar.y=mouseX, mouseY
+    if inBounds(mouseX, mouseY, cuttingBoardCoordinate):
+        app.lineEndLocation=(mouseX, mouseY)
 
 
 def cutting_onMouseRelease(app, mouseX, mouseY):
@@ -83,7 +103,7 @@ def cutting_onMouseRelease(app, mouseX, mouseY):
         app.holdMortar=False
         mortar.x, mortar.y=mortar.ogXY
     if inBounds(mouseX, mouseY, cuttingBoardCoordinate, ):
-        app.lines.append()
+        app.dragLine=False
     
 
 def cutting_onMouseMove(app, mouseX, mouseY):

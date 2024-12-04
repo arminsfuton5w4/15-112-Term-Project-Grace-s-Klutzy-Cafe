@@ -4,7 +4,6 @@ from PIL import Image
 from urllib.request import urlopen
 import os, pathlib
 # from layout import * 
-from startScreen import *
 
 ################################################################################
         # Fixing speed of the program, credit to Professor Kosbie
@@ -350,7 +349,7 @@ def onAppStart(app):
     app.showFinal=False
 
 #VIEW
-def game_drawTable():
+def drawTable():
     tableW, tableH =125,100         
     for i in range(3):
         if i%2==1:
@@ -360,7 +359,7 @@ def game_drawTable():
 
 lightPink=rgb(251,227,227)
 
-def game_drawOrderList(app):
+def drawOrderList(app):
     menuWidth, menuHeight=200, 140
     drawRect(app.width-450, app.height-475, menuWidth, menuHeight, fill=lightPink, opacity=80, border='black')
     drawLabel('Orders:', 450, 45, font='grenze', bold=True, size=14)
@@ -387,7 +386,7 @@ def getCellLeftTop(app, row, col):
     cellTop = 200 + row * app.cellHeight
     return (cellLeft, cellTop)
 
-def drawCell(app, rows, col):
+def game_drawCell(app, rows, col):
     cellLeft, cellTop=getCellLeftTop(app, rows, col)
     cellWidth,cellHeight=50,50
     drawRect(cellLeft, cellTop, cellWidth, cellHeight,
