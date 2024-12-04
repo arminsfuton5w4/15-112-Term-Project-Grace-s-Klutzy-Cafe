@@ -7,29 +7,33 @@ from cmu_graphics import *
 # if order is "completed" on the counter:
 # instead of showing the final product, pops into the cutting station
 # pauses the rest of the game until the cutting is finished
-# cut once (draw 1 line), in that case need line class?
-# grind once (draw 1 circle) - arc tool?
 
 # Toppings that can be cut: strawberries, mango, chocolate
 # Toppings to be grinded: matcha, red bean, ube
 
+# cut once (draw 1 line), in that case need line class?
+# grind once (draw 1 circle) - arc tool?
+
+# player can pick up either the mortar or the knife. But if the topping property
+# doesn't match the tool, then the player cannot do anything with the tool
+# if the player picks up a tool that MATCHES the topping property, then...
+# the player can cut/grind the topping.
+
+# there are two toppings to PREP each time. Once the first topping has been
+# prepped, the second topping needs to be prepped.
+# once the second topping is prepped, the screen goes back to the game.
+
 #new app variables:
-def onAppStart(app):
+def onScreenActivate(app):
     app.prepMode=True #starts as False
 
-    app.holdKnife=False
-    app.holdMortar=False
+    app.currOrder=orderList.orders[0]
 
-# class cutLines:
-#     def __init__(self):
-#         self.x1,self.y1, self.x2,self.y2=None
-#         self.dash=False
-#     pass
+    app.holdKnife, app.holdMortar=False, False
 
-# line1=cutLines()
-# line2=cutLines()
-
-# allLines=[line1, line2]
+def cutting_onStep(app):
+    if checkPrepProgress():
+        setActiveScreen('game')
 
 class Tool:
     def __init__(self, name, link, x,y, ogXY, bounds):
@@ -43,9 +47,12 @@ class Tool:
 
     def draw(link, x, y):
         drawImage(fixImage(self.image), x, y)
-    pass
 
 cuttingBoardCoordinate=[(375, 150), width=375, height=240]
+# center (563, 270)
+
+topping1, topping2=app.currOrder[1], app.currOrder[2]
+prepList=(topping1, topping2)
 
 knife=Tool('knife','images/knife.PNG',320, 210, (320, 210), )
 mortar=Tool('mortar', 'images/mortar.PNG',320, 210, (320, 210))
@@ -56,6 +63,8 @@ def cutting_redrawAll (app):
     knife.draw()
     mortar.draw()
 
+    for 
+
     if ((app.lineStartLocation !=None) and
         (app.lineEndLocation !=None)):
             if app.cuttingMode:
@@ -63,14 +72,14 @@ def cutting_redrawAll (app):
             elif app.grindingMode:
                 drawGrind(app)
 
+# Inspiration from checkpoint in 4.4.2 Mouse Moves and Drags
 def drawCut(app):
     x0, y0=app.lineStartLocation
     x1, y1=app.lineEndLocation
     drawLine(x0, y0, x1, y1, dashes=app.draggingLine)
 
 def drawGrind(app):
-    
-    drawArc(boardX, boardY, width, height, startAngle, sweepAngle,
+    drawArc(563, 270, width, height, startAngle, sweepAngle,
             dashes=app.draggingLine)
 
 def inBounds(mouseX, mouseY, coordinates, width, height):
@@ -82,9 +91,12 @@ def inBounds(mouseX, mouseY, coordinates, width, height):
     return False
 
 def cutting_onMousePress(app, mouseX, mouseY):
-    app.lineStartLocation=(mouseX, mouseY)
-    app.lineEndLocation=None
-    pass
+    if app.holdKnife:
+        app.lineStartLocation=(mouseX, mouseY)
+        app.lineEndLocation=None
+    if app.holdMortar:
+        #idk
+        pass
 
 def cutting_onMouseDrag(app, mouseX, mouseY):
     if app.holdKnife:
@@ -93,7 +105,6 @@ def cutting_onMouseDrag(app, mouseX, mouseY):
         mortar.x, mortar.y=mouseX, mouseY
     if inBounds(mouseX, mouseY, cuttingBoardCoordinate):
         app.lineEndLocation=(mouseX, mouseY)
-
 
 def cutting_onMouseRelease(app, mouseX, mouseY):
     if not app.holdKnife and inBounds(mouseX, mouseX, knife.bounds, knife.w, knife.h):
@@ -105,9 +116,22 @@ def cutting_onMouseRelease(app, mouseX, mouseY):
     if inBounds(mouseX, mouseY, cuttingBoardCoordinate, ):
         app.dragLine=False
     
-
 def cutting_onMouseMove(app, mouseX, mouseY):
     if app.holdKnife:
         knife.x, knife.y=mouseX, mouseY
     if app.holdMortar:
         mortar.x, mortar.y=mouseX, mouseY
+
+def doPrep(app):
+    for topping in prepList:
+        if topping.property=='cut':
+            pass
+        if topping.property=='grind':
+            pass
+
+def checkPrepProgress():
+    for topping in prepList:
+        if topping.state==False:
+            return False
+    return True
+        

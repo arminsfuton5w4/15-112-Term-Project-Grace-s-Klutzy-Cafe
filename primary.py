@@ -424,7 +424,7 @@ def drawDisplay(app):
         for i in range(1,3):
             drawLabel('+', start+(2*i*w+gap), app.height-50, size=24)
 
-def redrawAll(app):
+def game_redrawAll(app):
     drawImage(fixImage('images/backdrop.PNG'), 0,0, width=app.width,
               height=app.height+10)
 
