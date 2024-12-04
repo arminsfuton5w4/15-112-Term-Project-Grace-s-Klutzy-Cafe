@@ -169,6 +169,7 @@ class Toppings:
         self.r=25
         self.ogXY=ogXY
         self.property=property
+        self.state=False
     
     def __repr__(self):
         return f'{self.name}'  
@@ -629,10 +630,10 @@ def isCurrOrderComplete(base, t1, t2, app):
     currOrder=orderList.orders[0]
     if (base==currOrder[0] and (t1==currOrder[1] or t1==currOrder[2])
         and (t2==currOrder[2] or t2==currOrder[1])):
-        app.orderComplete=True
-
+        
         setActiveScreen('cutting')
 
+        app.orderComplete=True
         waitressG.whichOrder=currOrder
         orderList.finished.append(currOrder)
         app.isCooking=False
