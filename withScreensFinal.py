@@ -34,7 +34,8 @@ class Waitress:
         self.isBackAtCounter=False
     
     def draw(self):
-        drawImage(fixImage(self.image),self.x, self.y,width=125,height=145, align='bottom-left')
+        drawImage(fixImage(self.image),self.x, self.y,width=125,height=145,
+                  align='bottom-left')
     
     def waitressPath(self, start, target):
         visited=set()
@@ -193,7 +194,8 @@ mango=Toppings('mango', 'images/mango.PNG',252, 90, (252,90))
 
 toppingSet={strawberry, mango, chocolate, ube, redBean, matcha}
 
-ingredientList=[cakeRoll, crepeCake, sunday, milkTea, strawberry, mango, chocolate, ube, redBean, matcha]
+ingredientList=[cakeRoll, crepeCake, sunday, milkTea, strawberry, mango,
+                chocolate, ube, redBean, matcha]
 
 class Orders:
     def __init__(self):
@@ -329,7 +331,8 @@ def onAppStart(app):
     app.counter=0
 
     app.customers=[]
-    app.customerSkin=['images/blueBunny.PNG', 'images/yellowBunny.PNG', 'images/greenBunny.PNG']
+    app.customerSkin=['images/blueBunny.PNG', 'images/yellowBunny.PNG',
+                      'images/greenBunny.PNG']
     app.customerJustServed=[]
     app.isCooking=False
     app.revenue=0.00
@@ -393,11 +396,14 @@ def game_drawCell(app, rows, col):
              fill=None, border='black', borderWidth=0.15)   
 
 def drawDisplay(app):
-    drawImage(fixImage('images/display.PNG'), 0,0, width=app.width, height=app.height)
+    drawImage(fixImage('images/display.PNG'), 0,0, width=app.width,
+              height=app.height)
     drawLabel('instructions:', 81, 415, size=16)
     #display revenue
-    drawLabel(f'earning      tip         total', app.width-200, app.height-70, size=16, align='center', font='grenze')
-    drawLabel(f'${income.earning} + ${income.tip} = ${income.total}', app.width-200, app.height-40, size=22, align='center')
+    drawLabel(f'earning      tip         total', app.width-200, app.height-70,
+              size=16, align='center', font='grenze')
+    drawLabel(f'${income.earning} + ${income.tip} = ${income.total}',
+              app.width-200, app.height-40, size=22, align='center')
     #display currOrder
     if len(orderList.orders)>0:
         currOrder=orderList.orders[0]
@@ -405,13 +411,16 @@ def drawDisplay(app):
         w,h=75,75
         start, gap=60, 10
         drawImage(fixImage(base.image), start, app.height-90, width=w, height=h)
-        drawImage(fixImage(t1.image), start+w+gap, app.height-90, width=w-10, height=h-10)
-        drawImage(fixImage(t2.image), start+2*(w+gap), app.height-90, width=w-10, height=h-10)
+        drawImage(fixImage(t1.image), start+w+gap, app.height-90, width=w-10,
+                  height=h-10)
+        drawImage(fixImage(t2.image), start+2*(w+gap), app.height-90,
+                  width=w-10, height=h-10)
         for i in range(1,3):
             drawLabel('+', start+(2*i*w+gap), app.height-50, size=24)
 
 def game_redrawAll(app):
-    drawImage(fixImage('images/backdrop.PNG'), 0,0, width=app.width, height=app.height+10)
+    drawImage(fixImage('images/backdrop.PNG'), 0,0, width=app.width,
+              height=app.height+10)
 
     drawOrderList(app)
     drawBoard(app)
@@ -420,16 +429,19 @@ def game_redrawAll(app):
     waitressG.draw()
     
     for customer in app.customers:
-        drawImage(fixImage(customer.skin), customer.x, customer.y, width=50,height=100, align='center')
+        drawImage(fixImage(customer.skin), customer.x, customer.y, width=50,
+                  height=100, align='center')
         drawLabel(customer.time, customer.x, customer.y)
 
     for base in baseSet:
         size=base.r*2
-        drawImage(fixImage(base.image), base.x, base.y, align='center', width=size, height=size)
+        drawImage(fixImage(base.image), base.x, base.y, align='center',
+                  width=size, height=size)
     
     for topping in toppingSet:
         size=topping.r*2
-        drawImage(fixImage(topping.image), topping.x, topping.y, align='center', width=size, height=size)
+        drawImage(fixImage(topping.image), topping.x, topping.y, align='center',
+                  width=size, height=size)
     
     drawFinal(app, waitressG)
     drawSucess(app, waitressG)
@@ -438,7 +450,8 @@ def game_redrawAll(app):
     drawTable()
 
     if app.showMenu:
-        drawImage(fixImage('images/menu.PNG'), 0, 0, width=app.width,height=app.height, opacity=95)
+        drawImage(fixImage('images/menu.PNG'), 0, 0, width=app.width,
+                  height=app.height, opacity=95)
 
 def drawSucess(app, waitress):
     if app.deliverySucess==0:
@@ -465,7 +478,8 @@ def drawFinal(app, waitress):
         for final in finalSet:
             currOrderBase=orderList.finished[-1][0]
             if final.base==currOrderBase:
-                drawImage(fixImage(final.link), waitress.x+10, waitress.y-100, width=45, height=45)
+                drawImage(fixImage(final.link), waitress.x+10, waitress.y-100,
+                          width=45, height=45)
 
 #CONTROLLER
 
