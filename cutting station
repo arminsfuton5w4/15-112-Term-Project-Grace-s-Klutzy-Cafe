@@ -1,3 +1,5 @@
+from cmu_graphics import *
+
 ################################################################################
     # cutting station
 ################################################################################
@@ -5,26 +7,87 @@
 # if order is "completed" on the counter:
 # instead of showing the final product, pops into the cutting station
 # pauses the rest of the game until the cutting is finished
-# maximum cut 2 times
-# maximum rotate 2 times
+# cut once (draw 1 line), in that case need line class?
+# grind once (draw 1 circle) - arc tool?
 
-class cutLines:
+# Toppings that can be cut: strawberries, mango, chocolate
+# Toppings to be grinded: matcha, red bean, ube
+
+#new app variables:
+def onAppStart(app):
+    app.prepMode=True #starts as False
+
+    app.holdKnife=False
+    app.holdMortar=False
+
+# class cutLines:
+#     def __init__(self):
+#         self.x1,self.y1, self.x2,self.y2=None
+#         self.dash=False
+#     pass
+
+# line1=cutLines()
+# line2=cutLines()
+
+# allLines=[line1, line2]
+
+class Tool:
+    def __init__(self, name, link, x,y, ogXY, bounds):
+        self.name=name
+        self.image=link
+        self.x, self.y=x,y
+        self.size=25
+        self.ogXY=ogXY
+        self.bounds=bounds
+        self.w, self.h=64, 80
+
+    def draw(link, x, y):
+        drawImage(fixImage(self.image), x, y)
     pass
 
-class Knife:
-    pass
-cKnife=Knife()
+cuttingBoardCoordinate=[(375, 150), width=375, height=240]
 
-class Mortar:
-    pass
-cMortar=Mortar()
+knife=Tool('knife','images/knife.PNG',320, 210, (320, 210), )
+mortar=Tool('mortar', 'images/mortar.PNG',320, 210, (320, 210))
 
 def cutting_redrawAll (app):
     drawImage(fixImage('images/cuttingStation.PNG'), 0,0, app.width, app.height)
 
+    knife.draw()
+    mortar.draw()
+
+def inBounds(mouseX, mouseY, coordinates, width, height):
+    left, top=coordinates[0], coordinates[1]
+    right=left+width
+    bottom=top+height
+    if (left <=mouseX<=right) and (top<=mouseY<=bottom):
+        return True
+    return False
 
 def cutting_onMousePress(app, mouseX, mouseY):
+    if 
     pass
 
 def cutting_onMouseDrag(app, mouseX, mouseY):
-    pass
+    if app.holdKnife:
+        knife.x, knife.y=mouseX, mouseY
+    if app.holdMortar:
+        mortar.x, mortar.y=mouseX, mouseY
+
+
+def cutting_onMouseRelease(app, mouseX, mouseY):
+    if not app.holdKnife and inBounds(mouseX, mouseX, knife.bounds, knife.w, knife.h):
+        app.holdKnife=False
+        knife.x, knife.y=knife.ogXY
+    if not app.holdMortar and inBounds(mouseX, mouseY, mortar.bounds, mortar.w, mortar.h):
+        app.holdMortar=False
+        mortar.x, mortar.y=mortar.ogXY
+    if inBounds(mouseX, mouseY, cuttingBoardCoordinate, ):
+        app.lines.append()
+    
+
+def cutting_onMouseMove(app, mouseX, mouseY):
+    if app.holdKnife:
+        knife.x, knife.y=mouseX, mouseY
+    if app.holdMortar:
+        mortar.x, mortar.y=mouseX, mouseY

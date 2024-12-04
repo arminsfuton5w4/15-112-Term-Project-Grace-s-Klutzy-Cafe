@@ -4,6 +4,7 @@ from PIL import Image
 from urllib.request import urlopen
 import os, pathlib
 # from layout import * 
+from startScreen import *
 
 ################################################################################
         # Fixing speed of the program, credit to Professor Kosbie
@@ -349,7 +350,7 @@ def onAppStart(app):
     app.showFinal=False
 
 #VIEW
-def drawTable():
+def game_drawTable():
     tableW, tableH =125,100         
     for i in range(3):
         if i%2==1:
@@ -359,7 +360,7 @@ def drawTable():
 
 lightPink=rgb(251,227,227)
 
-def drawOrderList(app):
+def game_drawOrderList(app):
     menuWidth, menuHeight=200, 140
     drawRect(app.width-450, app.height-475, menuWidth, menuHeight, fill=lightPink, opacity=80, border='black')
     drawLabel('Orders:', 450, 45, font='grenze', bold=True, size=14)
@@ -410,7 +411,7 @@ def drawDisplay(app):
         for i in range(1,3):
             drawLabel('+', start+(2*i*w+gap), app.height-50, size=24)
 
-def redrawAll(app):
+def game_redrawAll(app):
     drawImage(fixImage('images/backdrop.PNG'), 0,0, width=app.width, height=app.height+10)
 
     drawOrderList(app)
@@ -631,7 +632,7 @@ def clickedPerson(mouseX, mouseY, app):
                 return (node, True)
     return (None, False)
 
-def moveWaitress(i, app, waitress):
+def game_moveWaitress(i, app, waitress):
     for node in layout.filledSeats:
         if node==app.clickedPerson:
             target=node
@@ -683,7 +684,7 @@ def goBackCounter(i, app, waitress):
         app.gwIndex=0
         waitress.isBackAtCounter=False
 
-def onMousePress(app, mouseX, mouseY):
+def game_onMousePress(app, mouseX, mouseY):
     if app.isCooking:
         check=clickedIngredient(mouseX, mouseY)
         if check[1]:
@@ -704,7 +705,7 @@ def insideMenuButton(mouseX, mouseY, app):
     if (buttonLeft<=mouseX<=right) and (buttonTop<=mouseY<=bottom):
         return True
 
-def onMouseDrag(app, mouseX, mouseY):
+def game_onMouseDrag(app, mouseX, mouseY):
     if app.isCooking:
         ingredient=app.currItem
         if ingredient!=None:
@@ -718,7 +719,7 @@ def wrongIngredientReset(app):
     if app.currItem==counter.base:
         counter.base=None
 
-def onMouseRelease(app, mouseX, mouseY):
+def game_onMouseRelease(app, mouseX, mouseY):
     if app.isCooking:
         if inCounter(mouseX, mouseY):
             #Checks for property of currItem - base or topping - & updates counter
