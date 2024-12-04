@@ -4,6 +4,7 @@ from PIL import Image
 from urllib.request import urlopen
 import os, pathlib
 from startScreen import * 
+from cuttingStation import *
 
 ################################################################################
         # Fixing speed of the program, credit to Professor Kosbie
@@ -20,6 +21,17 @@ def fixImage(imagePath):
         cmuImage = CMUImage(pilImage)
         imagePathToCmuImageMap[imagePath] = cmuImage
         return cmuImage
+    
+################################################################################
+    # start screen
+################################################################################
+
+def start_redrawAll(app):
+    drawImage(fixImage('images/start.PNG'), 0,0, width=app.width,
+              height=app.height)
+
+def start_onMousePress(app, mouseX, mouseY):
+    setActiveScreen('game')
 
 ################################################################################
         # CLASSES

@@ -25,15 +25,40 @@ from cmu_graphics import *
 
 #new app variables:
 def onScreenActivate(app):
-    app.prepMode=True #starts as False
+    app.stepsPerSecond=3
 
     app.currOrder=orderList.orders[0]
 
+    app.grindingMode, app.cuttingMode=False, False
+
     app.holdKnife, app.holdMortar=False, False
+
+    app.lineStartLocation, app.lineEndLocation=None
+
+    app.circleTrail=[]
+    app.maxCircles=7
+    app.mousePress=False
+    app.startGrinding=0
+
+    for topping in prepList:
+        topping.finishedPrep=False
+
+topping1, topping2=app.currOrder[1], app.currOrder[2]
+prepList=(topping1, topping2)
 
 def cutting_onStep(app):
     if checkPrepProgress():
+        app.orderComplete=True
+        waitressG.whichOrder=app.currOrder
+        orderList.finished.append(currOrder)
+        app.isCooking=False
+        orderList.orders.pop(0)
+        print('order is complete!')
+        whenOrderReady(app)
+        
         setActiveScreen('game')
+    if app.grindingMode and app.mousePress:
+        app.startGrinding+=1
 
 class Tool:
     def __init__(self, name, link, x,y, ogXY, bounds):
@@ -48,11 +73,10 @@ class Tool:
     def draw(link, x, y):
         drawImage(fixImage(self.image), x, y)
 
-cuttingBoardCoordinate=[(375, 150), width=375, height=240]
+cBoardCoordinates=(375, 150)
+cBoardWidth=375
+cBoardHeight=240
 # center (563, 270)
-
-topping1, topping2=app.currOrder[1], app.currOrder[2]
-prepList=(topping1, topping2)
 
 knife=Tool('knife','images/knife.PNG',320, 210, (320, 210), )
 mortar=Tool('mortar', 'images/mortar.PNG',320, 210, (320, 210))
@@ -63,24 +87,25 @@ def cutting_redrawAll (app):
     knife.draw()
     mortar.draw()
 
-    for 
-
-    if ((app.lineStartLocation !=None) and
-        (app.lineEndLocation !=None)):
-            if app.cuttingMode:
+    if app.cuttingMode:
+        if ((app.lineStartLocation !=None) and
+            (app.lineEndLocation !=None)):
                 drawCut(app)
-            elif app.grindingMode:
-                drawGrind(app)
-
+    if app.grindingMode:
+        drawGrind(app)
+    
 # Inspiration from checkpoint in 4.4.2 Mouse Moves and Drags
+# Grinding animation/UI taught by Austin!!
 def drawCut(app):
     x0, y0=app.lineStartLocation
     x1, y1=app.lineEndLocation
     drawLine(x0, y0, x1, y1, dashes=app.draggingLine)
 
 def drawGrind(app):
-    drawArc(563, 270, width, height, startAngle, sweepAngle,
-            dashes=app.draggingLine)
+    for i in range(len(app.circleTrail)):
+        cx, cy=app.circleTrail[i]
+        opacity=(len(app.circleTrail)-1)*100
+        drawCircle(cx, cy, 20, fill='gray', opacity=opacity)
 
 def inBounds(mouseX, mouseY, coordinates, width, height):
     left, top=coordinates[0], coordinates[1]
@@ -91,12 +116,13 @@ def inBounds(mouseX, mouseY, coordinates, width, height):
     return False
 
 def cutting_onMousePress(app, mouseX, mouseY):
-    if app.holdKnife:
+    if inBounds(mouseX, mouseY, ):
+        pass
+    if app.cuttingMode:
         app.lineStartLocation=(mouseX, mouseY)
         app.lineEndLocation=None
-    if app.holdMortar:
-        #idk
-        pass
+    if app.grindingMode:
+        app.mousePress=True
 
 def cutting_onMouseDrag(app, mouseX, mouseY):
     if app.holdKnife:
@@ -124,14 +150,14 @@ def cutting_onMouseMove(app, mouseX, mouseY):
 
 def doPrep(app):
     for topping in prepList:
-        if topping.property=='cut':
-            pass
-        if topping.property=='grind':
-            pass
+        if topping.finishedPrep==False:
+            if topping.property=='grind':
+                app.holdMortar==True
+            elif topping.property=='cut':
+                pass
 
 def checkPrepProgress():
     for topping in prepList:
         if topping.state==False:
             return False
     return True
-        
