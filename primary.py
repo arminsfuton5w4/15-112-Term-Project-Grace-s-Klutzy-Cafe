@@ -179,19 +179,19 @@ class Toppings:
 def distance(x0,y0,x1,y1):
     return (((x1-x0)**2+(y1-y0)**2)**0.5)
 
-cakeRoll=Base('cake-roll', 'images/cakeRoll.PNG',50, 120, 7.50, (50, 120),'cut')
-crepeCake=Base('crepe-cake','images/crepeCake.PNG',92,100,8.00,(92,105),'grind')
-sunday=Base('sunday', 'images/sunday.PNG', 50, 190, 6.75, (50, 190), 'cut')
-milkTea=Base('milk-tea', 'images/boba2.PNG', 92, 165, 5.50, (92, 165),'grind')
+cakeRoll=Base('cake-roll', 'images/cakeRoll.PNG',50, 120, 7.50, (50, 120))
+crepeCake=Base('crepe-cake','images/crepeCake.PNG',92,100,8.00,(92,105))
+sunday=Base('sunday', 'images/sunday.PNG', 50, 190, 6.75, (50, 190))
+milkTea=Base('milk-tea', 'images/boba2.PNG', 92, 165, 5.50, (92, 165))
 
 baseSet={cakeRoll, crepeCake, sunday, milkTea}
 
-matcha=Toppings('matcha', 'images/matcha.PNG',175, 60, (175,60))
-strawberry=Toppings('strawberry', 'images/strawberry.PNG',215,45, (215,45))
-chocolate=Toppings('chocolate', 'images/chocolate.PNG',252,28, (252,28))
-ube=Toppings('ube', 'images/ube.PNG',175,128, (175,128))
-redBean=Toppings('red-bean', 'images/redBean.PNG',215,115, (215,115))
-mango=Toppings('mango', 'images/mango.PNG',252, 90, (252,90))
+matcha=Toppings('matcha', 'images/matcha.PNG',175, 60, (175,60), 'grind')
+strawberry=Toppings('strawberry', 'images/strawberry.PNG',215,45, (215,45),'cut')
+chocolate=Toppings('chocolate', 'images/chocolate.PNG',252,28, (252,28),'cut')
+ube=Toppings('ube', 'images/ube.PNG',175,128, (175,128),'grind')
+redBean=Toppings('red-bean', 'images/redBean.PNG',215,115, (215,115),'grind')
+mango=Toppings('mango', 'images/mango.PNG',252, 90, (252,90),'cut')
 
 toppingSet={strawberry, mango, chocolate, ube, redBean, matcha}
 
