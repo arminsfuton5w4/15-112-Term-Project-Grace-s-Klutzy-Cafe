@@ -45,7 +45,8 @@ def onScreenActivate(app):
 def getCurrOrder():
     if orderList.orders!=[]:
         currOrder=orderList.orders[0]
-    return currOrder
+        return currOrder
+    
 currOrder=getCurrOrder()
 topping1, topping2=currOrder[1], currOrder[2]
 prepList=(topping1, topping2)
