@@ -621,6 +621,9 @@ def game_onStep(app):
         goBackCounter(app.gwIndex, app, waitressG)
         app.gwIndex+=1
     whenOrderDone(app)
+
+    prepList=getPrepList()
+    app.prepList=prepList
         
 ################################################################################
         # POINT in POLYGON    
@@ -795,8 +798,6 @@ def game_onMouseRelease(app, mouseX, mouseY):
 ################################################################################
 def getPrepList():
     currOrder=None
-    print("called getPrepList")
-    print('orderList is:', orderList.orders)
     if orderList.orders!=[]:
         currOrder=orderList.orders[0]
         print('currOrder:', currOrder)
@@ -821,21 +822,22 @@ def onScreenActivate(app):
     app.startGrinding=0
     app.showCutCounter=0
 
-    app.prepList=getPrepList()
-
     if app.prepList!=[]:
         for topping in app.prepList:
             topping.finishedPrep=False
 
 def getCurrTopping(prepList):
     print('getCurrTopping from', prepList)
-    currTopping=prepList[0]
+    currTopping=None
+    if prepList!=[]:
+        currTopping=prepList[0]
+    print(currTopping, currTopping.property)
     return currTopping
 
 def cutting_onStep(app):
     doPrep(app)
     updateProgress(app)
-    if checkPrepProgress():
+    if checkPrepProgress(app):
         app.orderComplete=True
         waitressG.whichOrder=app.currOrder
         orderList.finished.append(orderList.orders[0])
@@ -998,7 +1000,7 @@ def updateProgress(app):
             print('newPrepList:', app.prepList)
             app.grindingMode=False
 
-def checkPrepProgress():
+def checkPrepProgress(app):
     for topping in app.prepList:
         if not topping.finishedPrep:
             return False
