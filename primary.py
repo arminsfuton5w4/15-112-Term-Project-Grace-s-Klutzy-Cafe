@@ -611,7 +611,7 @@ def game_onStep(app):
     # cutting screen stuff
     prepList=getPrepList()
     app.prepList=prepList
-    # resetToppingState(app)
+    resetToppingState(app)
         
 ################################################################################
         # POINT in POLYGON    
@@ -814,9 +814,9 @@ def onScreenActivate(app):
 
 
 def resetToppingState(app):
-    if app.prepList!=[]:
+    if app.donePrepList!=[]:
         print('app.prepList:', app.prepList)
-        for topping in app.prepList:
+        for topping in app.donePrepList:
             print('reset topping.finishedPrep to False')
             topping.finishedPrep=False
 
@@ -827,7 +827,6 @@ def getCurrTopping(prepList):
     return currTopping
 
 def cutting_onStep(app):
-    # doPrep(app)
     updateProgress(app)
     if checkPrepProgress(app):
         app.orderComplete=True
@@ -917,11 +916,11 @@ def drawQueue(app):
 
     if len(app.prepList)==2:
         otherTopping=app.prepList[1]
-        drawImage(otherTopping.image, app.width-150, 110, width=75, height=75,
+        drawImage(fixImage(otherTopping.image), app.width-150, 110, width=75, height=75,
                   align='center')
     else:
         otherTopping=app.donePrepList[0]
-        drawImage(otherTopping.prepped, app.width-230, 110, width=75, height=75,
+        drawImage(fixImage(otherTopping.prepped), app.width-230, 110, width=75, height=75,
                   align='center')
         
 def inBounds(mouseX, mouseY, coordinates, width, height):
