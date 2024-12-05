@@ -23,12 +23,14 @@ from cmu_graphics import *
 # prepped, the second topping needs to be prepped.
 # once the second topping is prepped, the screen goes back to the game.
 
-#new app variables:
+# new app variables:
 def onScreenActivate(app):
 
     app.grindingMode, app.cuttingMode=False, False
 
     app.holdKnife, app.holdMortar=False, False
+
+    app.dragLine=False
 
     app.lineStartLocation, app.lineEndLocation=None
 
@@ -77,7 +79,7 @@ class Tool:
         self.w, self.h=64, 80
 
     def draw(link, x, y):
-        drawImage(fixImage(self.image), x, y)
+        drawImage(fixImage(self.image), x, y, width=100, height=100)
 
 cBoardCoordinates=(375, 150)
 cBoardWidth=375
@@ -106,13 +108,16 @@ def cutting_redrawAll (app):
 def drawCut(app):
     x0, y0=app.lineStartLocation
     x1, y1=app.lineEndLocation
-    drawLine(x0, y0, x1, y1, dashes=app.draggingLine)
+    drawLine(x0, y0, x1, y1, dashes=app.dragLine)
 
 def drawGrind(app):
     for i in range(len(app.circleTrail)):
         cx, cy=app.circleTrail[i]
         opacity=(len(app.circleTrail)-1)*100
         drawCircle(cx, cy, 20, fill='gray', opacity=opacity)
+    
+def drawQueue(app):
+    pass
 
 def inBounds(mouseX, mouseY, coordinates, width, height):
     left, top=coordinates[0], coordinates[1]
@@ -136,21 +141,25 @@ def cutting_onMouseDrag(app, mouseX, mouseY):
         knife.x, knife.y=mouseX, mouseY
     if app.holdMortar:
         mortar.x, mortar.y=mouseX, mouseY
-    if inBounds(mouseX, mouseY, cBoardX, ):
+    if inBounds(mouseX, mouseY, cBoardCoordinates, cBoardWidth, cBoardHeight):
         if app.grindingMode:
             app.circleTrail.append((mouseX, mouseY))
         if app.cuttingMode:
             app.lineEndLocation=(mouseX, mouseY)
 
 def cutting_onMouseRelease(app, mouseX, mouseY):
-    if not app.holdKnife and inBounds(mouseX, mouseX, knife.bounds, knife.w, knife.h):
+    if not app.cuttingMode and inBounds(mouseX, mouseX, knife.bounds, knife.w, knife.h):
         app.holdKnife=False
         knife.x, knife.y=knife.ogXY
-    if not app.holdMortar and inBounds(mouseX, mouseY, mortar.bounds, mortar.w, mortar.h):
+    if not app.grindingMode and inBounds(mouseX, mouseY, mortar.bounds, mortar.w, mortar.h):
         app.holdMortar=False
         mortar.x, mortar.y=mortar.ogXY
-    if inBounds(mouseX, mouseY, cuttingBoardCoordinate, ):
-        app.dragLine=False
+    
+    if inBounds(mouseX, mouseY, cBoardCoordinates, cBoardWidth, cBoardHeight):
+        if app.grindingMode:
+            app.mousePress=False
+        if app.cuttingMode:
+            app.dragLine=False
     
 def cutting_onMouseMove(app, mouseX, mouseY):
     if app.holdKnife:
