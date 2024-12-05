@@ -387,6 +387,7 @@ def onAppStart(app):
     app.showPrepped=0
 
     app.prepList=[]
+    app.donePrepList=[]
 
 #VIEW
 def drawTable():
@@ -811,6 +812,7 @@ def onScreenActivate(app):
     app.showCutCounter=0
     app.showPrepped=0
 
+
 def resetToppingState(app):
     if app.prepList!=[]:
         print('app.prepList:', app.prepList)
@@ -827,9 +829,10 @@ def getCurrTopping(prepList):
 def cutting_onStep(app):
     # doPrep(app)
     updateProgress(app)
-    if checkPrepProgress(app) and app.showPrepped==10:
+    if checkPrepProgress(app):
         app.orderComplete=True
         waitressG.whichOrder=orderList.orders[0]
+        print('orderList.orders:', orderList.orders)
         orderList.finished.append(orderList.orders[0])
         app.isCooking=False
         orderList.orders.pop(0)
@@ -870,9 +873,14 @@ knife=Tool('knife','images/knife.PNG', 150,200, (150,200))
 mortar=Tool('mortar', 'images/mortar.PNG',170,325, (170,325))
 
 def drawCurrTopping(app):
-    currTopping=getCurrTopping(app.prepList)
-    drawImage(fixImage(currTopping.image),cBoardCenter[0],cBoardCenter[1],
-              width=300, height=300, align='center')
+    if app.prepList!=[]:
+        currTopping=getCurrTopping(app.prepList)
+        drawImage(fixImage(currTopping.image),cBoardCenter[0],cBoardCenter[1],
+                width=300, height=300, align='center')
+    if len(app.donePrepList)==2:
+        currTopping=app.donePrepList[1]
+        drawImage(fixImage(currTopping.prepped),cBoardCenter[0],cBoardCenter[1],
+                width=300, height=300, align='center')
 
 def cutting_redrawAll (app):
     drawImage(fixImage('images/cuttingStation.PNG'), 0,0, width=app.width, height=app.height)
@@ -906,11 +914,13 @@ def drawGrind(app):
 def drawQueue(app):
     drawLabel('Next:', app.width-150, 75, size=16)
     drawLabel('Done:', app.width-230, 75, size=16)
-    otherTopping=app.prepList[1]
-    if not otherTopping.finishedPrep:
+
+    if len(app.prepList)==2:
+        otherTopping=app.prepList[1]
         drawImage(otherTopping.image, app.width-150, 110, width=75, height=75,
                   align='center')
     else:
+        otherTopping=app.donePrepList[0]
         drawImage(otherTopping.prepped, app.width-230, 110, width=75, height=75,
                   align='center')
         
@@ -1003,12 +1013,12 @@ def resetPrep(app, currTopping):
         app.mousePress=False
         app.grindingMode=False
     app.prepList.pop(0)
+    app.donePrepList.append(currTopping)
 
 def checkPrepProgress(app):
-    for topping in app.prepList:
-        if not topping.finishedPrep:
-            return False
-    return True
+    if len(app.donePrepList)==2:
+        return True
+    return False
 
 def main():
     runAppWithScreens(initialScreen='start')
