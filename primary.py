@@ -30,7 +30,7 @@ def start_redrawAll(app):
     drawImage(fixImage('images/start.PNG'), 0,0, width=app.width,
               height=app.height)
 
-def start_onMousePress(app, mouseX, mouseY):
+def start_onMousePress(app, x, y):
     setActiveScreen('game')
 
 ################################################################################
@@ -194,11 +194,11 @@ def distance(x0,y0,x1,y1):
     return (((x1-x0)**2+(y1-y0)**2)**0.5)
 
 cakeRoll=Base('cake-roll', 'images/cakeRoll.PNG',50, 120, 7.50, (50, 120), 
-              'images/finalCrepeCake.PNG')
+              'images/finalCakeRoll.PNG')
 crepeCake=Base('crepe-cake','images/crepeCake.PNG',92,100,8.00,(92,105),
-               'images/finalSunday.PNG')
+               'images/finalCrepeCake.PNG')
 sunday=Base('sunday', 'images/sunday.PNG', 50, 190, 6.75, (50, 190),
-            'images/finalCakeRoll.PNG')
+            'images/finalSunday.PNG')
 milkTea=Base('milk-tea', 'images/boba2.PNG', 92, 165, 5.50, (92, 165),
              'images/finalMilkTea.PNG')
 
