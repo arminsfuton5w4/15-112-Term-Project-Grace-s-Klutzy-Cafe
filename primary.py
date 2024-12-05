@@ -229,13 +229,6 @@ class finalOrders:
         self.link=link
         self.x, self.y=None, None
 
-# finalCrepeCake=finalOrders(crepeCake, 'images/finalCrepeCake.PNG')
-# finalSunday=finalOrders(sunday, 'images/finalSunday.PNG')
-# finalCakeRoll=finalOrders(cakeRoll, 'images/finalCakeRoll.PNG')
-# finalMilkTea=finalOrders(milkTea, 'images/finalMilkTea.PNG')
-
-# finalSet={finalCrepeCake, finalSunday, finalCakeRoll, finalMilkTea}
-
 ################################################################################
         # DFS
         # Initial write-up assissted + taught by TA Lukas (lkebulad)
@@ -798,18 +791,19 @@ def onScreenActivate(app):
     app.mousePress=False
     app.startGrinding=0
 
-    for topping in prepList:
-        topping.finishedPrep=False
+    if prepList!=None:
+        for topping in prepList:
+            topping.finishedPrep=False
 
-def getCurrOrder():
+def getCurrTopping():
+    currOrder=None
     if orderList.orders!=[]:
         currOrder=orderList.orders[0]
-        return currOrder
-
-currOrder=getCurrOrder()
-topping1, topping2=currOrder[1], currOrder[2]
-prepList=(topping1, topping2)
-currTopping=prepList[0]
+    if currOrder!=None:
+        topping1, topping2=currOrder[1], currOrder[2]
+        prepList=(topping1, topping2)
+        currTopping=prepList[0]
+        return prepList, currTopping
 
 def cutting_onStep(app):
     doPrep(app)
@@ -817,7 +811,7 @@ def cutting_onStep(app):
     if checkPrepProgress():
         app.orderComplete=True
         waitressG.whichOrder=app.currOrder
-        orderList.finished.append(currOrder)
+        orderList.finished.append(orderList.orders[0])
         app.isCooking=False
         orderList.orders.pop(0)
         print('order is complete!')
@@ -829,13 +823,12 @@ def cutting_onStep(app):
         app.startGrinding+=1
 
 class Tool:
-    def __init__(self, name, link, x,y, ogXY, bounds):
+    def __init__(self, name, link, x,y, ogXY):
         self.name=name
         self.image=link
         self.x, self.y=x,y
         self.size=25
         self.ogXY=ogXY
-        self.bounds=bounds
         self.w, self.h=64, 80
 
     def draw(link, x, y):
@@ -845,20 +838,24 @@ cBoardCoordinates=(375, 150)
 cBoardWidth, cBoardHeight=375, 240
 cBoardCenter=(563, 270)
 
-knife=Tool('knife','images/knife.PNG',320, 210, (320, 210), )
+knife=Tool('knife','images/knife.PNG',320, 210, (320, 210))
 mortar=Tool('mortar', 'images/mortar.PNG',320, 210, (320, 210))
 
-def cutting_redrawAll (app):
-    drawImage(fixImage('images/cuttingStation.PNG'), 0,0, app.width, app.height)
+def drawCurrTopping():
+    prepList, currTopping=getCurrTopping()
+    drawImage(fixImage(currTopping.image),cBoardCenter[0],cBoardCenter[1],
+              width=150, height=150)
 
-    drawImage(fixImage(currTopping.image),cBoardCenter, width=150, height=150)
+def cutting_redrawAll (app):
+    drawImage(fixImage('images/cuttingStation.PNG'), 0,0, width=app.width, height=app.height)
+
+    drawCurrTopping()
     knife.draw()
     mortar.draw()
 
     if app.cuttingMode:
-        if ((app.lineStartLocation !=None) and
-            (app.lineEndLocation !=None)):
-                drawCut(app)
+        if ((app.lineStartLocation !=None) and (app.lineEndLocation !=None)):
+            drawCut(app)
     if app.grindingMode:
         drawGrind(app)
     
@@ -878,6 +875,7 @@ def drawGrind(app):
 def drawQueue(app):
     drawLabel('Next:', app.width-100, 50, size=24)
     drawLabel('Done:', app.width-225, 50, size=24)
+    prepList, currTopping=getCurrTopping()
     otherTopping=prepList[1]
     if not otherTopping.finishedPrep:
         drawImage(otherTopping.image, app.width-100, 100, width=75, height=75,
@@ -887,7 +885,6 @@ def drawQueue(app):
                   align='center')
         #change to finished image
         
-
 def inBounds(mouseX, mouseY, coordinates, width, height):
     left, top=coordinates[0], coordinates[1]
     right=left+width
@@ -897,10 +894,10 @@ def inBounds(mouseX, mouseY, coordinates, width, height):
     return False
 
 def cutting_onMousePress(app, mouseX, mouseY):
-    if inBounds(mouseX, mouseY, knife.bounds, knife.w, knife.h) and not app.holdMortar:
+    if inBounds(mouseX, mouseY, knife.ogXY, knife.w, knife.h) and not app.holdMortar:
         app.holdKnife=True
         knife.x, knife.y=mouseX, mouseY
-    if inBounds(mouseX, mouseY, mortar.bounds, mortar.w, mortar.h) and not app.holdKnife:
+    if inBounds(mouseX, mouseY, mortar.ogXY, mortar.w, mortar.h) and not app.holdKnife:
         app.holdMortar=True
         mortar.x, mortar.y=mouseX, mouseY
     if app.cuttingMode:
@@ -941,6 +938,7 @@ def cutting_onMouseMove(app, mouseX, mouseY):
         mortar.x, mortar.y=mouseX, mouseY
 
 def doPrep(app):
+    prepList, currTopping=getCurrTopping()
     if not currTopping.finishedPrep:
         if currTopping.property=='grind':
             app.grindingMode=True
@@ -948,14 +946,20 @@ def doPrep(app):
             app.cuttingMode=True
 
 def updateProgress():
+    prepList, currTopping=getCurrTopping()
     if app.cuttingMode:
         if ((app.lineStartLocation !=None) and (app.lineEndLocation !=None)):
             currTopping.finishedPrep=True
+            prepList.pop(0)
+            prepList.append(currTopping)
     if app.grindingMode:
         if app.startGrinding==30:
             currTopping.finishedPrep=True
+            prepList.pop(0)
+            prepList.append(currTopping)
 
 def checkPrepProgress():
+    prepList, currTopping=getCurrTopping()
     for topping in prepList:
         if not topping.finishedPrep:
             return False
