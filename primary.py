@@ -622,8 +622,10 @@ def game_onStep(app):
         app.gwIndex+=1
     whenOrderDone(app)
 
+    # cutting screen stuff
     prepList=getPrepList()
     app.prepList=prepList
+    resetToppingState(app)
         
 ################################################################################
         # POINT in POLYGON    
@@ -822,8 +824,10 @@ def onScreenActivate(app):
     app.startGrinding=0
     app.showCutCounter=0
 
+def resetToppingState(app):
     if app.prepList!=[]:
         for topping in app.prepList:
+            print('reset topping.finishedPrep to False')
             topping.finishedPrep=False
 
 def getCurrTopping(prepList):
@@ -839,7 +843,7 @@ def cutting_onStep(app):
     updateProgress(app)
     if checkPrepProgress(app):
         app.orderComplete=True
-        waitressG.whichOrder=app.currOrder
+        waitressG.whichOrder=orderList.orders[0]
         orderList.finished.append(orderList.orders[0])
         app.isCooking=False
         orderList.orders.pop(0)
@@ -989,15 +993,13 @@ def updateProgress(app):
             print('currTopping done!')
             app.prepList.pop(0)
             app.prepList.append(currTopping)
-            print('newPrepList:', app.prepList)
             app.cuttingMode=False
     if app.grindingMode:
-        if app.startGrinding==10:
+        if app.startGrinding==30:
             print('stop grinding!')
             currTopping.finishedPrep=True
             app.prepList.pop(0)
             app.prepList.append(currTopping)
-            print('newPrepList:', app.prepList)
             app.grindingMode=False
 
 def checkPrepProgress(app):
