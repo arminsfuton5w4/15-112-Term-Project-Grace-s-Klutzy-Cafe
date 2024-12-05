@@ -174,13 +174,14 @@ class Base:
         return hash(str(self)) 
 
 class Toppings:
-    def __init__(self, name, link, x,y, ogXY, property):
+    def __init__(self, name, link, x,y, ogXY, property, prepped):
         self.name=name
         self.image=link
         self.x, self.y=x,y
         self.r=25
         self.ogXY=ogXY
         self.property=property
+        self.prepped=prepped
         self.finishedPrep=False
     
     def __repr__(self):
@@ -203,12 +204,17 @@ milkTea=Base('milk-tea', 'images/boba2.PNG', 92, 165, 5.50, (92, 165),
 
 baseSet={cakeRoll, crepeCake, sunday, milkTea}
 
-matcha=Toppings('matcha', 'images/matcha.PNG',175, 60, (175,60), 'grind')
-strawberry=Toppings('strawberry', 'images/strawberry.PNG',215,45, (215,45),'cut')
-chocolate=Toppings('chocolate', 'images/chocolate.PNG',252,28, (252,28),'cut')
-ube=Toppings('ube', 'images/ube.PNG',175,128, (175,128),'grind')
-redBean=Toppings('red-bean', 'images/redBean.PNG',215,115, (215,115),'grind')
-mango=Toppings('mango', 'images/mango.PNG',252, 90, (252,90),'cut')
+matcha=Toppings('matcha', 'images/matcha.PNG',175, 60, (175,60), 'grind',
+                'images/groundMatcha.PNG')
+strawberry=Toppings('strawberry', 'images/strawberry.PNG',215,45, (215,45),'cut',
+                    'images/cutStrawberry.PNG')
+chocolate=Toppings('chocolate', 'images/chocolate.PNG',252,28, (252,28),'cut',
+                   'images/cutChoco.PNG')
+ube=Toppings('ube', 'images/ube.PNG',175,128, (175,128),'grind', 'images/groundUbe.PNG')
+redBean=Toppings('red-bean', 'images/redBean.PNG',215,115, (215,115),'grind',
+                 'images/groundRedBean.PNG')
+mango=Toppings('mango', 'images/mango.PNG',252, 90, (252,90),'cut',
+               'images/cutMango.PNG')
 
 toppingSet={strawberry, mango, chocolate, ube, redBean, matcha}
 
@@ -377,6 +383,8 @@ def onAppStart(app):
     app.mousePress=False
     app.startGrinding=0
     app.showCutCounter=0
+    app.
+    app.showPrepped=0
 
     app.prepList=[]
 
@@ -487,9 +495,7 @@ def game_redrawAll(app):
                   height=app.height, opacity=95)
 
 def drawSucess(app, waitress):
-    if app.deliverySucess==0:
-        pass
-    elif app.deliverySucess==1:
+    if app.deliverySucess==1:
         drawRect(waitress.x+30, waitress.y-160, 70, 15, fill=lightPink)
         drawLabel('SUCCESS!!', waitress.x+30, waitress.y-150, align='left')
     elif app.deliverySucess==2:
@@ -625,7 +631,7 @@ def game_onStep(app):
     # cutting screen stuff
     prepList=getPrepList()
     app.prepList=prepList
-    resetToppingState(app)
+    # resetToppingState(app)
         
 ################################################################################
         # POINT in POLYGON    
@@ -798,11 +804,11 @@ def game_onMouseRelease(app, mouseX, mouseY):
 ################################################################################
     # cutting station
 ################################################################################
+
 def getPrepList():
     currOrder=None
     if orderList.orders!=[]:
         currOrder=orderList.orders[0]
-        print('currOrder:', currOrder)
     if currOrder!=None:
         topping1, topping2=currOrder[1], currOrder[2]
         prepList=[topping1, topping2]
@@ -823,9 +829,11 @@ def onScreenActivate(app):
     app.mousePress=False
     app.startGrinding=0
     app.showCutCounter=0
+    app.showPrepped=0
 
 def resetToppingState(app):
     if app.prepList!=[]:
+        print('app.prepList:', app.prepList)
         for topping in app.prepList:
             print('reset topping.finishedPrep to False')
             topping.finishedPrep=False
@@ -841,7 +849,7 @@ def getCurrTopping(prepList):
 def cutting_onStep(app):
     doPrep(app)
     updateProgress(app)
-    if checkPrepProgress(app):
+    if checkPrepProgress(app) and app.showPrepped==10:
         app.orderComplete=True
         waitressG.whichOrder=orderList.orders[0]
         orderList.finished.append(orderList.orders[0])
@@ -854,6 +862,11 @@ def cutting_onStep(app):
     
     if app.grindingMode and app.mousePress:
         app.startGrinding+=1
+    
+    if app.grindingMode and app.showCutCounter==30:
+        app.showPrepped+=1
+    if app.cuttingMode and app.completed:
+        app.showPrepped+=1
 
 class Tool:
     def __init__(self, name, link, x,y, ogXY):
@@ -915,7 +928,7 @@ def drawQueue(app):
         drawImage(otherTopping.image, app.width-150, 110, width=75, height=75,
                   align='center')
     else:
-        drawImage(otherTopping.image, app.width-230, 110, width=75, height=75,
+        drawImage(otherTopping.prepped, app.width-230, 110, width=75, height=75,
                   align='center')
         #change to finished image
         
@@ -982,25 +995,33 @@ def doPrep(app):
     if not currTopping.finishedPrep:
         if currTopping.property=='grind':
             app.grindingMode=True
+            app.cuttingMode=False
         elif currTopping.property=='cut':
             app.cuttingMode=True
+            app.grindingMode=False
 
 def updateProgress(app):
     currTopping=getCurrTopping(app.prepList)
     if app.cuttingMode:
-        if ((app.lineStartLocation !=None) and (app.lineEndLocation !=None)):
+        if app.:
             currTopping.finishedPrep=True
-            print('currTopping done!')
-            app.prepList.pop(0)
-            app.prepList.append(currTopping)
-            app.cuttingMode=False
+            print('stop cutting')
+            resetPrep(app, currTopping)
     if app.grindingMode:
         if app.startGrinding==30:
             print('stop grinding!')
             currTopping.finishedPrep=True
-            app.prepList.pop(0)
-            app.prepList.append(currTopping)
-            app.grindingMode=False
+            resetPrep(app, currTopping)
+
+def resetPrep(app, currTopping):
+    if app.cuttingMode:
+        app.lineStartLocation,app.lineEndLocation=None
+        app.cuttingMode=False
+    if app.grindingMode:
+        app.startGrinding=0
+        app.grindingMode=False
+    app.prepList.pop(0)
+    app.prepList.append(currTopping)
 
 def checkPrepProgress(app):
     for topping in app.prepList:
