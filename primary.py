@@ -14,7 +14,7 @@ def fixImage(imagePath):
     if imagePath in imagePathToCmuImageMap:
         return imagePathToCmuImageMap[imagePath]
     else:
-        absPath = '/Users/gh/Documents/GitHub/oneTwelveTP/' + imagePath
+        absPath = imagePath
         pilImage=Image.open(absPath)
         cmuImage = CMUImage(pilImage)
         imagePathToCmuImageMap[imagePath] = cmuImage
@@ -847,9 +847,8 @@ class Tool:
         self.name=name
         self.image=link
         self.x, self.y=x,y
-        self.size=40
         self.ogXY=ogXY
-        self.w, self.h=64, 80
+        self.w, self.h=70, 90
 
     def draw(self):
         drawImage(fixImage(self.image), self.x, self.y, width=150, height=150,
