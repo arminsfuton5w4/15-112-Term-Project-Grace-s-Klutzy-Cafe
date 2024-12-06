@@ -847,7 +847,7 @@ class Tool:
         self.name=name
         self.image=link
         self.x, self.y=x,y
-        self.size=25
+        self.size=40
         self.ogXY=ogXY
         self.w, self.h=64, 80
 
