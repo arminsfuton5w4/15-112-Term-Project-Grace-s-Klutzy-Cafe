@@ -437,8 +437,8 @@ def drawDisplay(app):
                   height=h-10)
         drawImage(fixImage(t2.image), start+2*(w+gap), app.height-90,
                   width=w-10, height=h-10)
-        for i in range(0,2):
-            drawLabel('+', start+(2*i*(w+gap)), app.height-50, size=24)
+        for i in range(1,2):
+            drawLabel('+', start+(i*(w+gap)), app.height-50, size=24)
 
 def game_redrawAll(app):
     drawImage(fixImage('images/backdrop.PNG'), 0,0, width=app.width,
@@ -861,7 +861,7 @@ class Tool:
         drawImage(fixImage(self.image), self.x, self.y, width=150, height=150,
                   align='center')
 
-cBoardCoordinates=(375, 150)
+cBoardCoordinates=(350, 150)
 cBoardWidth, cBoardHeight=375, 240
 cBoardCenter=(500, 270)
 
@@ -873,6 +873,7 @@ def drawCurrTopping(app):
         currTopping=getCurrTopping(app.prepList)
         drawImage(fixImage(currTopping.image),cBoardCenter[0],cBoardCenter[1],
                 width=300, height=300, align='center')
+        drawLabel(currTopping.property, 350, 370, size=24)
     if len(app.donePrepList)==2:
         currTopping=app.donePrepList[1]
         drawImage(fixImage(currTopping.prepped),cBoardCenter[0],cBoardCenter[1],
@@ -918,6 +919,7 @@ def drawQueue(app):
         otherTopping=app.prepList[1]
         drawImage(fixImage(otherTopping.image), app.width-150, 110, width=75, height=75,
                   align='center')
+        drawLabel(otherTopping.property, app.width-180, 110)
     elif len(app.donePrepList)>0:
         otherTopping=app.donePrepList[0]
         drawImage(fixImage(otherTopping.prepped), app.width-230, 110, width=75, height=75,
