@@ -11,4 +11,5 @@ Instructions:
 Please download the image folder so you can see all the graphics.
 Please also download CMU graphics from the CS academy website. Then, unzip the CMU graphics folder and add it next to the primary file on your laptop finder.
 
+
 Shortcut Commands:
