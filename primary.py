@@ -828,7 +828,7 @@ def getCurrTopping(prepList):
 
 def cutting_onStep(app):
     updateProgress(app)
-    if checkPrepProgress(app):
+    if checkPrepProgress(app) and app.showPrepped>=5:
         app.orderComplete=True
         waitressG.whichOrder=orderList.orders[0]
         print('orderList.orders:', orderList.orders)
@@ -843,9 +843,9 @@ def cutting_onStep(app):
     if app.grindingMode and app.mousePress:
         app.startGrinding+=1
     
-    if app.grindingMode and app.showCutCounter==30:
+    if app.showCutCounter>=30 and app.showPrepped>0:
         app.showPrepped+=1
-    if app.cuttingMode and app.doneCut:
+    if app.doneCut and app.showPrepped>0:
         app.showPrepped+=1
     
     if app.counter%50==0 and len(orderList.orders)>0:
@@ -941,7 +941,8 @@ def cutting_onMousePress(app, mouseX, mouseY):
         app.holdMortar=True
         mortar.x, mortar.y=mouseX, mouseY
     #on cutting board
-    if inBounds(mouseX, mouseY, cBoardCoordinates, cBoardWidth, cBoardHeight):
+    if (inBounds(mouseX, mouseY, cBoardCoordinates, cBoardWidth, cBoardHeight) and
+        currTopping!=None):
         if app.holdKnife and not app.cuttingMode and currTopping.property=='cut':
             app.cuttingMode=True
             app.lineStartLocation=(mouseX, mouseY)
@@ -978,7 +979,7 @@ def cutting_onMouseRelease(app, mouseX, mouseY):
         if app.grindingMode:
             app.mousePress=False
             app.circleTrail=[]
-        if app.cuttingMode and app.lineStartLocation!=None:
+        if app.cuttingMode and app.lineEndLocation!=None:
             app.doneCut=True
             app.dragLine=False
     
