@@ -838,13 +838,9 @@ def cutting_onStep(app):
     
     if app.grindingMode and app.mousePress:
         app.startGrinding+=1
-        print('startGrinding:', app.startGrinding)
     
     if app.showPrepped>0:
         app.showPrepped+=1
-    
-    if app.counter%50==0 and len(orderList.orders)>0:
-        countDown(app)
 
 class Tool:
     def __init__(self, name, link, x,y, ogXY):
