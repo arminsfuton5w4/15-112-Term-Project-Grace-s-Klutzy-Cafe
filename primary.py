@@ -812,12 +812,9 @@ def onScreenActivate(app):
     app.showCutCounter=0
     app.showPrepped=0
 
-
 def resetToppingState(app):
     if app.donePrepList!=[]:
-        print('app.prepList:', app.prepList)
         for topping in app.donePrepList:
-            print('reset topping.finishedPrep to False')
             topping.finishedPrep=False
 
 def getCurrTopping(prepList):
@@ -828,7 +825,7 @@ def getCurrTopping(prepList):
 
 def cutting_onStep(app):
     updateProgress(app)
-    if checkPrepProgress(app) and app.showPrepped>=5:
+    if checkPrepProgress(app) and app.showPrepped>=20:
         app.orderComplete=True
         waitressG.whichOrder=orderList.orders[0]
         print('orderList.orders:', orderList.orders)
@@ -843,9 +840,11 @@ def cutting_onStep(app):
     if app.grindingMode and app.mousePress:
         app.startGrinding+=1
     
-    if app.showCutCounter>=30 and app.showPrepped>0:
+    if app.showgCounter>=20 and app.showPrepped>0:
+        print('app.showPrepped:', app.showPrepped)
         app.showPrepped+=1
     if app.doneCut and app.showPrepped>0:
+        print('app.showPrepped:', app.showPrepped)
         app.showPrepped+=1
     
     if app.counter%50==0 and len(orderList.orders)>0:
@@ -998,7 +997,7 @@ def updateProgress(app):
             resetPrep(app, currTopping)
             print('stop cutting', currTopping, currTopping.finishedPrep)
     if app.grindingMode:
-        if app.startGrinding==10:
+        if app.startGrinding==20:
             currTopping.finishedPrep=True
             app.showPrepped+=1
             resetPrep(app, currTopping)
