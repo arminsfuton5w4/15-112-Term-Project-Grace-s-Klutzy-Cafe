@@ -641,17 +641,14 @@ def clickedIngredient(mouseX, mouseY):
     return (None, False)
 
 def isCurrOrderComplete(base, t1, t2, app):
-    print('base:', base, 't1:', t1, 't2:', t2)
     currOrder=orderList.orders[0]
     if (base==currOrder[0] and (t1==currOrder[1] or t1==currOrder[2])
         and (t2==currOrder[2] or t2==currOrder[1])):
         setActiveScreen('cutting')
-        print('done prep')
         return True
 
 def isInCurrOrder(currItem):
     currOrder=orderList.orders[0]
-    print('current order is:', currOrder)
     if currItem in currOrder:
         return True
     return False
@@ -759,13 +756,10 @@ def game_onMouseRelease(app, mouseX, mouseY):
             #Checks for property of currItem - base/topping - & updates counter
             if app.currItem in baseSet:
                 counter.base=app.currItem
-                print('base:', counter.base)
             elif app.currItem in toppingSet and counter.topping1==None:
                 counter.topping1=app.currItem
-                print('t1:', counter.topping1)
             elif app.currItem in toppingSet and counter.topping2==None:
                 counter.topping2=app.currItem
-                print('t2:', counter.topping2)
 
             #Checks if the currItem is in the currOrder
             if isInCurrOrder(app.currItem):
@@ -827,11 +821,9 @@ def cutting_onStep(app):
     if checkPrepProgress(app) and app.showPrepped>=200:
         app.orderComplete=True
         waitressG.whichOrder=orderList.orders[0]
-        print('orderList.orders:', orderList.orders)
         orderList.finished.append(orderList.orders[0])
         app.isCooking=False
         orderList.orders.pop(0)
-        print('order is complete!')
         whenOrderReady(app)
         
         setActiveScreen('game')
