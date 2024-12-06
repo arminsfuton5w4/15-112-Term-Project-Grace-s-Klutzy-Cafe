@@ -843,7 +843,6 @@ def cutting_onStep(app):
         print('startGrinding:', app.startGrinding)
     
     if app.showPrepped>0:
-        print('app.showPrepped:', app.showPrepped)
         app.showPrepped+=1
     
     if app.counter%50==0 and len(orderList.orders)>0:
@@ -894,9 +893,12 @@ def cutting_redrawAll(app):
     if app.grindingMode and app.holdMortar and app.circleTrail!=[]:
         drawGrind(app)
         print('grinding with mortar')
-    
-# Inspiration from checkpoint in 4.4.2 Mouse Moves and Drags
-# Grinding animation/UI taught by Austin!!
+
+################################################################################
+    # Cut animation inspired by checkpoint in 4.4.2 Mouse Moves and Drags
+    # Grinding animation/UI taught by Austin!!
+################################################################################
+
 def drawCut(app):
     x0, y0=app.lineStartLocation
     x1, y1=app.lineEndLocation
