@@ -437,8 +437,8 @@ def drawDisplay(app):
                   height=h-10)
         drawImage(fixImage(t2.image), start+2*(w+gap), app.height-90,
                   width=w-10, height=h-10)
-        for i in range(1,2):
-            drawLabel('+', start+(i*(w+gap)), app.height-50, size=24)
+        for i in range(1,3):
+            drawLabel('+', start+(w+gap/2)*i, app.height-50, size=24)
 
 def game_redrawAll(app):
     drawImage(fixImage('images/backdrop.PNG'), 0,0, width=app.width,
@@ -890,10 +890,8 @@ def cutting_redrawAll(app):
     if app.cuttingMode and app.holdKnife:
         if ((app.lineStartLocation !=None) and (app.lineEndLocation !=None)):
             drawCut(app)
-        print('cutting with knife')
     if app.grindingMode and app.holdMortar and app.circleTrail!=[]:
         drawGrind(app)
-        print('grinding with mortar')
 
 ################################################################################
     # Cut animation inspired by checkpoint in 4.4.2 Mouse Moves and Drags
@@ -919,7 +917,6 @@ def drawQueue(app):
         otherTopping=app.prepList[1]
         drawImage(fixImage(otherTopping.image), app.width-150, 110, width=75, height=75,
                   align='center')
-        drawLabel(otherTopping.property, app.width-180, 110)
     elif len(app.donePrepList)>0:
         otherTopping=app.donePrepList[0]
         drawImage(fixImage(otherTopping.prepped), app.width-230, 110, width=75, height=75,
