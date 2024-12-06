@@ -648,6 +648,7 @@ def isCurrOrderComplete(base, t1, t2, app):
     if (base==currOrder[0] and (t1==currOrder[1] or t1==currOrder[2])
         and (t2==currOrder[2] or t2==currOrder[1])):
         setActiveScreen('cutting')
+        print('done prep')
         return True
 
 def isInCurrOrder(currItem):
@@ -794,7 +795,7 @@ def getPrepList():
         prepList=[topping1, topping2]
         return prepList
 
-def onScreenActivate(app):
+def cutting_onScreenActivate(app):
 
     app.grindingMode, app.cuttingMode=False, False
 
@@ -802,7 +803,7 @@ def onScreenActivate(app):
 
     app.dragLine=False
 
-    app.lineStartLocation, app.lineEndLocation=None
+    app.lineStartLocation, app.lineEndLocation=None, None
 
     app.circleTrail=[]
     app.maxCircles=7
@@ -811,6 +812,12 @@ def onScreenActivate(app):
     app.doneCut=False
     app.showCutCounter=0
     app.showPrepped=0
+
+    app.donePrepList=[]
+
+    knife.x, knife.y=knife.ogXY
+    mortar.x, mortar.y=mortar.ogXY
+
 
 def resetToppingState(app):
     if app.donePrepList!=[]:
@@ -825,7 +832,7 @@ def getCurrTopping(prepList):
 
 def cutting_onStep(app):
     updateProgress(app)
-    if checkPrepProgress(app) and app.showPrepped>=20:
+    if checkPrepProgress(app) and app.showPrepped>=200:
         app.orderComplete=True
         waitressG.whichOrder=orderList.orders[0]
         print('orderList.orders:', orderList.orders)
@@ -839,11 +846,9 @@ def cutting_onStep(app):
     
     if app.grindingMode and app.mousePress:
         app.startGrinding+=1
+        print('startGrinding:', app.startGrinding)
     
-    if app.showgCounter>=20 and app.showPrepped>0:
-        print('app.showPrepped:', app.showPrepped)
-        app.showPrepped+=1
-    if app.doneCut and app.showPrepped>0:
+    if app.showPrepped>0:
         print('app.showPrepped:', app.showPrepped)
         app.showPrepped+=1
     
@@ -880,7 +885,7 @@ def drawCurrTopping(app):
         drawImage(fixImage(currTopping.prepped),cBoardCenter[0],cBoardCenter[1],
                 width=300, height=300, align='center')
 
-def cutting_redrawAll (app):
+def cutting_redrawAll(app):
     drawImage(fixImage('images/cuttingStation.PNG'), 0,0, width=app.width, height=app.height)
 
     drawCurrTopping(app)
@@ -917,7 +922,7 @@ def drawQueue(app):
         otherTopping=app.prepList[1]
         drawImage(fixImage(otherTopping.image), app.width-150, 110, width=75, height=75,
                   align='center')
-    else:
+    elif len(app.donePrepList)>1:
         otherTopping=app.donePrepList[0]
         drawImage(fixImage(otherTopping.prepped), app.width-230, 110, width=75, height=75,
                   align='center')
@@ -997,7 +1002,7 @@ def updateProgress(app):
             resetPrep(app, currTopping)
             print('stop cutting', currTopping, currTopping.finishedPrep)
     if app.grindingMode:
-        if app.startGrinding==20:
+        if app.startGrinding==30:
             currTopping.finishedPrep=True
             app.showPrepped+=1
             resetPrep(app, currTopping)
@@ -1007,6 +1012,7 @@ def resetPrep(app, currTopping):
     if app.cuttingMode:
         app.lineStartLocation,app.lineEndLocation=None, None
         app.cuttingMode=False
+        app.doneCut=False
     if app.grindingMode:
         app.startGrinding=0
         app.mousePress=False
