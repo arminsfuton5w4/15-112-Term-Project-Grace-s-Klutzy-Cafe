@@ -3,8 +3,6 @@ import random
 from PIL import Image
 from urllib.request import urlopen
 import os, pathlib
-# from startScreen import * 
-# from cuttingStation import *
 
 ################################################################################
         # Fixing speed of the program, credit to Professor Kosbie
